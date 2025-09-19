@@ -1,0 +1,160 @@
+    
+        :root {
+            --primary-color: #6A1B9A; 
+            --secondary-color: #D81B60;
+            --dark-text: #212121;
+            --light-bg: #F3E5F5;
+            --white: #FFFFFF;
+            --black: #000000;
+            --gray-medium: #757575;
+            --gradient-bg: linear-gradient(45deg, #6A1B9A, #D81B60); 
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            color: var(--dark-text);
+            line-height: 1.6;
+            background: var(--gradient-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+            overflow: hidden; 
+            position: relative;
+        }
+
+       
+        .full-page-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: cloudMove 25s linear infinite;
+        }
+
+        .cloud:nth-child(1) { width: 120px; height: 120px; top: 10%; left: -10%; animation-duration: 25s; }
+        .cloud:nth-child(2) { width: 150px; height: 150px; top: 30%; left: -15%; animation-duration: 30s; }
+        .cloud:nth-child(3) { width: 100px; height: 100px; top: 50%; left: -5%; animation-duration: 20s; }
+        .cloud:nth-child(4) { width: 180px; height: 180px; top: 70%; left: -20%; animation-duration: 35s; }
+        .cloud:nth-child(5) { width: 90px; height: 90px; top: 85%; left: -8%; animation-duration: 28s; }
+
+        @keyframes cloudMove {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(calc(100vw + 200px)); }
+        }
+
+        .container {
+            background-color: var(--white);
+            padding: 60px 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 90%;
+            animation: fadeInScale 0.8s ease-out forwards;
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 5rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.2rem;
+            color: var(--dark-text);
+            margin-bottom: 25px;
+        }
+
+        p {
+            font-size: 1.1rem;
+            color: var(--gray-medium);
+            margin-bottom: 40px;
+        }
+
+        .home-button {
+            background-color: var(--primary-color);
+            color: var(--white);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: 'Montserrat', sans-serif;
+            letter-spacing: 0.8px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .home-button:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            background-color: var(--secondary-color); 
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 4rem;
+            }
+
+            h2 {
+                font-size: 1.8rem;
+            }
+
+            p {
+                font-size: 1rem;
+            }
+
+            .container {
+                padding: 40px 30px;
+            }
+
+            .home-button {
+                padding: 12px 25px;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 3rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            .container {
+                padding: 30px 20px;
+            }
+        }

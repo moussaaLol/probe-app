@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>probe-app | User Profile</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Orbitron:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #6A1B9A;
+            --secondary-color: #D81B60;
+            --dark-text: #212121;
+            --light-bg: #F3E5F5;
+            --white: #FFFFFF;
+            --black: #000000;
+            --gray-light: #EEEEEE;
+            --gray-medium: #757575;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--white);
+            color: var(--dark-text);
+        }
+
+        /* Navigation (matches probe-app) */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 5%;
+            background-color: var(--white);
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .nav-logo-icon {
+            height: 40px;
+            width: auto;
+            margin-right: 12px;
+        }
+        
+        .auth-section {
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        /* Profile Container */
+        .profile-container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 5%;
+        }
+
+        .profile-header {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .profile-header {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        .avatar-container {
+            position: relative;
+        }
+
+        .profile-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid var(--primary-color);
+            box-shadow: 0 5px 15px rgba(106, 27, 154, 0.2);
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .profile-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .profile-bio {
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .profile-stats {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .stat-item:hover {
+            color: var(--primary-color);
+        }
+
+        .stat-value {
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--gray-medium);
+        }
+
+        .edit-profile-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+
+        .edit-profile-btn:hover {
+            background-color: var(--secondary-color);
+        }
+
+        /* Reviews Section */
+        .reviews-section {
+            margin-top: 40px;
+        }
+
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .review-card {
+            background-color: var(--white);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .review-app {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .review-rating {
+            color: #FFC107;
+        }
+
+        .review-date {
+            color: var(--gray-medium);
+            font-size: 0.9rem;
+        }
+
+        .review-content {
+            line-height: 1.6;
+        }
+
+        /* Edit Mode */
+        .edit-mode .profile-name,
+        .edit-mode .profile-bio {
+            border: 1px solid var(--gray-light);
+            padding: 8px;
+            border-radius: 5px;
+        }
+
+        .edit-mode .profile-name {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.5rem;
+        }
+
+        /* Popups */
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .popup-content {
+            background-color: var(--white);
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .popup-title {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--primary-color);
+        }
+
+        .popup-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .user-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+        }
+
+        .user-card {
+            text-align: center;
+        }
+
+        .user-avatar-sm {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 5px;
+        }
+
+        .user-name-sm {
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Loading State */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--light-bg);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/" class="logo">
+            <img src="https://i.ibb.co/Kxyq4qGh/Gemini-Generated-Image-uyuw4zuyuw4zuyuw-modified.png" alt="Probe App Logo" class="nav-logo-icon">
+            <span>probe-app</span>
+        </a>
+        <div class="auth-section">
+            <button id="authButton" class="auth-btn">Sign In</button>
+            <img id="userAvatar" class="user-avatar" src="" alt="User Avatar" style="display: none;">
+        </div>
+    </nav>
+
+    <div class="profile-container">
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+        </div>
+
+        <div id="profileContent" style="display: none;">
+            <div class="profile-header">
+                <div class="avatar-container">
+                    <img id="profileAvatar" class="profile-avatar" src="" alt="Profile Picture">
+                </div>
+                <div class="profile-info">
+                    <input type="text" id="profileName" class="profile-name" readonly>
+                    <textarea id="profileBio" class="profile-bio" readonly></textarea>
+                    
+                    <div class="profile-stats">
+                        <div class="stat-item" id="reviewsStat">
+                            <div class="stat-value" id="reviewCount">0</div>
+                            <div class="stat-label">Reviews</div>
+                        </div>
+                        <div class="stat-item" id="followersStat">
+                            <div class="stat-value" id="followerCount">0</div>
+                            <div class="stat-label">Followers</div>
+                        </div>
+                        <div class="stat-item" id="followingStat">
+                            <div class="stat-value" id="followingCount">0</div>
+                            <div class="stat-label">Following</div>
+                        </div>
+                    </div>
+                    
+                    <button id="editProfileBtn" class="edit-profile-btn" style="display: none;">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </button>
+                    <button id="saveProfileBtn" class="edit-profile-btn" style="display: none;">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </div>
+
+            <div class="reviews-section">
+                <h2 class="section-title">Recent Reviews</h2>
+                <div id="reviewsList">
+                    <!-- Reviews will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Followers Popup -->
+    <div class="popup-overlay" id="followersPopup">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h3 class="popup-title">Followers</h3>
+                <button class="popup-close" id="closeFollowersPopup">&times;</button>
+            </div>
+            <div class="user-grid" id="followersList">
+                <!-- Followers will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Following Popup -->
+    <div class="popup-overlay" id="followingPopup">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h3 class="popup-title">Following</h3>
+                <button class="popup-close" id="closeFollowingPopup">&times;</button>
+            </div>
+            <div class="user-grid" id="followingList">
+                <!-- Following will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBMUi291fwb-HSxlGPQMxdEJGUTiOOvFBs",
+            authDomain: "nexaverse-eeb07.firebaseapp.com",
+            projectId: "nexaverse-eeb07",
+            storageBucket: "nexaverse-eeb07.appspot.com",
+            messagingSenderId: "686342300627",
+            appId: "1:686342300627:web:90522d8f1129fb00b08526",
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // DOM Elements
+        const authButton = document.getElementById('authButton');
+        const userAvatar = document.getElementById('userAvatar');
+        const loadingElement = document.getElementById('loading');
+        const profileContent = document.getElementById('profileContent');
+        const profileAvatar = document.getElementById('profileAvatar');
+        const profileName = document.getElementById('profileName');
+        const profileBio = document.getElementById('profileBio');
+        const reviewCount = document.getElementById('reviewCount');
+        const followerCount = document.getElementById('followerCount');
+        const followingCount = document.getElementById('followingCount');
+        const editProfileBtn = document.getElementById('editProfileBtn');
+        const saveProfileBtn = document.getElementById('saveProfileBtn');
+        const reviewsList = document.getElementById('reviewsList');
+        const followersStat = document.getElementById('followersStat');
+        const followingStat = document.getElementById('followingStat');
+        const followersPopup = document.getElementById('followersPopup');
+        const followingPopup = document.getElementById('followingPopup');
+        const closeFollowersPopup = document.getElementById('closeFollowersPopup');
+        const closeFollowingPopup = document.getElementById('closeFollowingPopup');
+        const followersList = document.getElementById('followersList');
+        const followingList = document.getElementById('followingList');
+
+        // Get user ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const profileUserId = urlParams.get('user');
+        let isCurrentUserProfile = false;
+
+        // Load profile data
+        async function loadProfile() {
+            if (!profileUserId) {
+                window.location.href = '/';
+                return;
+            }
+
+            try {
+                // Load user data
+                const userDoc = await db.collection('users').doc(profileUserId).get();
+                if (!userDoc.exists) {
+                    throw new Error('User not found');
+                }
+
+                const userData = userDoc.data();
+                
+                // Set profile data
+                profileAvatar.src = userData.avatarUrl || 
+                    `https://ui-avatars.com/api/?name=${userData.username}&background=6A1B9A&color=FFFFFF&bold=true`;
+                profileName.value = userData.username || 'Anonymous';
+                profileBio.value = userData.bio || 'No bio yet';
+                followerCount.textContent = userData.followers?.length || 0;
+                followingCount.textContent = userData.following?.length || 0;
+
+                // Check if this is the current user's profile
+                if (auth.currentUser && auth.currentUser.uid === profileUserId) {
+                    isCurrentUserProfile = true;
+                    editProfileBtn.style.display = 'block';
+                }
+
+                // Load reviews
+                loadUserReviews();
+
+                // Show profile content
+                loadingElement.style.display = 'none';
+                profileContent.style.display = 'block';
+
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                loadingElement.innerHTML = '<p>Error loading profile. Please try again.</p>';
+            }
+        }
+
+        // Load user reviews
+        async function loadUserReviews() {
+            try {
+                const reviewsSnapshot = await db.collectionGroup('reviews')
+                    .where('userId', '==', profileUserId)
+                    .orderBy('createdAt', 'desc')
+                    .limit(5)
+                    .get();
+
+                reviewCount.textContent = reviewsSnapshot.size;
+                reviewsList.innerHTML = '';
+
+                if (reviewsSnapshot.empty) {
+                    reviewsList.innerHTML = '<p>No reviews yet.</p>';
+                    return;
+                }
+
+                // Get app names for reviews
+                const appPromises = reviewsSnapshot.docs.map(doc => {
+                    const appRef = doc.ref.parent.parent;
+                    return appRef.get();
+                });
+
+                const appSnapshots = await Promise.all(appPromises);
+
+                reviewsSnapshot.forEach((doc, index) => {
+                    const review = doc.data();
+                    const appData = appSnapshots[index].data();
+                    
+                    const reviewElement = document.createElement('div');
+                    reviewElement.className = 'review-card';
+                    reviewElement.innerHTML = `
+                        <div class="review-header">
+                            <span class="review-app">${appData?.name || 'Unknown App'}</span>
+                            <div>
+                                <span class="review-rating">${'★'.repeat(review.rating)}${'☆'.repeat(5-review.rating)}</span>
+                                <span class="review-date">${new Date(review.createdAt?.toDate()).toLocaleDateString()}</span>
+                            </div>
+                        </div>
+                        <div class="review-content">${review.comment}</div>
+                    `;
+                    reviewsList.appendChild(reviewElement);
+                });
+
+            } catch (error) {
+                console.error('Error loading reviews:', error);
+                reviewsList.innerHTML = '<p>Error loading reviews.</p>';
+            }
+        }
+
+        // Load followers/following list
+        async function loadUserList(userIds, container) {
+            container.innerHTML = '';
+            
+            if (!userIds || userIds.length === 0) {
+                container.innerHTML = '<p>No users found</p>';
+                return;
+            }
+
+            try {
+                const userPromises = userIds.map(uid => 
+                    db.collection('users').doc(uid).get()
+                );
+
+                const userSnapshots = await Promise.all(userPromises);
+
+                userSnapshots.forEach(doc => {
+                    if (doc.exists) {
+                        const user = doc.data();
+                        const userElement = document.createElement('div');
+                        userElement.className = 'user-card';
+                        userElement.innerHTML = `
+                            <img src="${user.avatarUrl || `https://ui-avatars.com/api/?name=${user.username}&background=6A1B9A&color=FFFFFF`}" 
+                                 class="user-avatar-sm" alt="${user.username}">
+                            <div class="user-name-sm">${user.username}</div>
+                        `;
+                        container.appendChild(userElement);
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error loading user list:', error);
+                container.innerHTML = '<p>Error loading users</p>';
+            }
+        }
+
+        // Event Listeners
+        editProfileBtn.addEventListener('click', () => {
+            document.body.classList.add('edit-mode');
+            profileName.readOnly = false;
+            profileBio.readOnly = false;
+            editProfileBtn.style.display = 'none';
+            saveProfileBtn.style.display = 'block';
+        });
+
+        saveProfileBtn.addEventListener('click', async () => {
+            try {
+                await db.collection('users').doc(profileUserId).update({
+                    username: profileName.value,
+                    bio: profileBio.value
+                });
+                
+                document.body.classList.remove('edit-mode');
+                profileName.readOnly = true;
+                profileBio.readOnly = true;
+                editProfileBtn.style.display = 'block';
+                saveProfileBtn.style.display = 'none';
+                
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                alert('Failed to update profile. Please try again.');
+            }
+        });
+
+        followersStat.addEventListener('click', async () => {
+            const userDoc = await db.collection('users').doc(profileUserId).get();
+            const followers = userDoc.data()?.followers || [];
+            await loadUserList(followers, followersList);
+            followersPopup.style.display = 'flex';
+        });
+
+        followingStat.addEventListener('click', async () => {
+            const userDoc = await db.collection('users').doc(profileUserId).get();
+            const following = userDoc.data()?.following || [];
+            await loadUserList(following, followingList);
+            followingPopup.style.display = 'flex';
+        });
+
+        closeFollowersPopup.addEventListener('click', () => {
+            followersPopup.style.display = 'none';
+        });
+
+        closeFollowingPopup.addEventListener('click', () => {
+            followingPopup.style.display = 'none';
+        });
+
+        // Auth state listener
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                authButton.style.display = 'none';
+                userAvatar.src = user.photoURL || 
+                    `https://ui-avatars.com/api/?name=${user.displayName || user.email}&background=6A1B9A&color=FFFFFF`;
+                userAvatar.style.display = 'block';
+                
+                // Load profile if not already loaded
+                if (!profileContent.style.display || profileContent.style.display === 'none') {
+                    loadProfile();
+                }
+            } else {
+                authButton.style.display = 'block';
+                userAvatar.style.display = 'none';
+                loadProfile(); // Still load profile if not authenticated
+            }
+        });
+
+        // Initialize
+        authButton.addEventListener('click', () => {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider);
+        });
+
+        loadProfile();
+    </script>
+</body>
+</html>

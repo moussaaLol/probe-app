@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>probe-app | App Details</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Orbitron:wght@500;600;700&display=swap" rel="stylesheet">
+       <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+    <nav>
+        <a href="/" class="logo">
+            <img src="https://i.ibb.co/Kxyq4qGh/Gemini-Generated-Image-uyuw4zuyuw4zuyuw-modified.png" alt="Probe App Logo" class="nav-logo-icon">
+            <span>probe-app</span>
+        </a>
+        
+        <div class="auth-section">
+            <div class="notification-bell" id="notificationBell">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge" id="notificationBadge">0</span>
+            </div>
+            <button id="authButton" class="auth-btn">Sign In</button>
+            <img id="userAvatar" class="user-avatar" src="" alt="User Avatar" style="display: none;">
+        </div>
+
+        <div id="notificationPopup" class="notification-popup">
+            <h3>Notifications</h3>
+            <ul class="notification-list" id="notificationList">
+                <li class="notification-item">
+                    No new notifications
+                </li>
+            </ul>
+        </div>
+
+        <div id="userDropdown" class="user-dropdown">
+            <div class="dropdown-item">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </div>
+            <div class="dropdown-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </div>
+            <div class="dropdown-divider"></div>
+            <div id="signOutBtn" class="dropdown-item">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Sign Out</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="app-details-container">
+        <div class="app-header">
+            <div class="app-thumbnail">
+                <img id="appThumbnail" src="" alt="App Thumbnail">
+            </div>
+            <div class="app-info">
+                <h1 class="app-title" id="appTitle">Loading...</h1>
+                <div class="app-meta">
+                    <span class="app-publisher" id="appPublisher">Publisher</span>
+                    <div class="app-rating">
+                        <div class="rating-stars" id="ratingStars"></div>
+                        <span class="rating-count" id="ratingCount">(0 ratings)</span>
+                    </div>
+                    <span class="app-price free-badge" id="appPrice">FREE</span>
+                </div>
+                <button class="download-btn" id="downloadBtn">
+                    <i class="fas fa-download"></i> Download
+                </button>
+                <div class="app-description">
+                    <h3>Description</h3>
+                    <p id="appDescription">Loading description...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="rating-section">
+            <h2 class="section-title">Rate This App</h2>
+            <div class="rating-form" id="ratingForm">
+                <div class="rating-stars-input">
+                    <input type="radio" id="star5" name="rating" value="5" class="star-input">
+                    <label for="star5" class="star-label"><i class="fas fa-star"></i></label>
+                    <input type="radio" id="star4" name="rating" value="4" class="star-input">
+                    <label for="star4" class="star-label"><i class="fas fa-star"></i></label>
+                    <input type="radio" id="star3" name="rating" value="3" class="star-input">
+                    <label for="star3" class="star-label"><i class="fas fa-star"></i></label>
+                    <input type="radio" id="star2" name="rating" value="2" class="star-input">
+                    <label for="star2" class="star-label"><i class="fas fa-star"></i></label>
+                    <input type="radio" id="star1" name="rating" value="1" class="star-input">
+                    <label for="star1" class="star-label"><i class="fas fa-star"></i></label>
+                </div>
+                <textarea class="rating-comment" id="ratingComment" placeholder="Share your experience with this app..."></textarea>
+                <button class="submit-rating-btn" id="submitRatingBtn">Submit Rating</button>
+            </div>
+
+            <h2 class="section-title">User Reviews</h2>
+            <div class="reviews-list" id="reviewsList">
+                <div class="no-reviews">No reviews yet. Be the first to review!</div>
+            </div>
+        </div>
+    </div>
+
+
+  <script src="/appl.js"></script>
+</body>
+</html>

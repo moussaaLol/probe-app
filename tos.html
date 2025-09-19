@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>probe-app | Terms & Policy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Orbitron:wght@600&display=swap" rel="stylesheet">
+      <link rel="stylesheet" href="tos.css">
+
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <img src="https://i.ibb.co/Kxyq4qGh/Gemini-Generated-Image-uyuw4zuyuw4zuyuw-modified.png" alt="logo" />
+      probe-app
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="tab-buttons">
+      <button class="tab-btn active" onclick="showTab('tos')">Terms of Service</button>
+      <button class="tab-btn" onclick="showTab('policy')">Privacy Policy</button>
+    </div>
+
+   <div id="tos" class="tab-content active">
+  <h2>Terms of Service</h2>
+  <p>
+    By accessing or using probe-app, you agree to be bound by these Terms. You must comply with all applicable laws and regulations. You agree not to misuse the platform, engage in unauthorized access, reverse-engineering, distribution of malware, or disruption of the service.
+  </p>
+  <p>
+    You are solely responsible for any activity under your account. Probe-app reserves the right to suspend, restrict, or terminate your access without prior notice if these Terms are violated or if deemed necessary to protect the platform or other users.
+  </p>
+  <p>
+    Content and services on probe-app may change without notice. Continued use of the platform after updates or changes constitutes your acceptance of the new terms. It is your responsibility to review the Terms periodically.
+  </p>
+
+  <h2>Usage Conditions</h2>
+  <p>
+    Users must not upload or distribute content that is illegal, offensive, or violates intellectual property rights. Bots, exploits, and attempts to bypass systems or manipulate mechanics are strictly forbidden.
+  </p>
+  <p>
+    You may not use probe-app in connection with any illegal or unauthorized purpose. Accounts found engaging in such activity may be permanently banned without refund or appeal.
+  </p>
+
+  <h2>Refund Policy</h2>
+  <p>
+    💰 <strong>PROBE-APP REFUND POLICY</strong>
+  </p>
+  <p>
+    <strong>Refunds are granted ONLY if:</strong>
+    <ul>
+      <li>Requested before the end of the APTT (Allowed Play Test Time) of 2 hours.</li>
+      <li>A verified bug or technical issue prevents usage, confirmed by the support team in #support.</li>
+    </ul>
+  </p>
+  <p>
+    <strong>Refunds will NOT be granted if:</strong>
+    <ul>
+      <li>You changed your mind after the 2-hour APTT period.</li>
+      <li>The account has been banned or restricted due to Terms of Service violations.</li>
+      <li>You experience dissatisfaction without evidence of a technical fault.</li>
+    </ul>
+  </p>
+  <p>
+    All refund requests must be submitted through our support system within 7 days of purchase. Refunds are issued at the discretion of the probe-app staff and may be denied if abuse is suspected.
+  </p>
+</div>
+
+<div id="policy" class="tab-content">
+  <h2>Privacy Policy</h2>
+  <p>
+    probe-app respects your privacy and is committed to protecting your personal data. This policy outlines how we collect, use, and store your information.
+  </p>
+
+  <h3>What We Collect</h3>
+  <ul>
+    <li>Email address and profile data (via Firebase Authentication)</li>
+    <li>Device and usage data for app analytics</li>
+    <li>Purchase and transaction details</li>
+  </ul>
+
+  <h3>How We Use Your Data</h3>
+  <p>
+    We use your data to:
+    <ul>
+      <li>Provide core features of the app</li>
+      <li>Support user authentication and account security</li>
+      <li>Improve app functionality and user experience</li>
+      <li>Send important notifications or updates</li>
+    </ul>
+  </p>
+
+  <h3>Data Sharing & Storage</h3>
+  <p>
+    We do not sell or share your personal data with third parties, except:
+    <ul>
+      <li>As required by law</li>
+      <li>For analytics or crash reporting (anonymized data only)</li>
+      <li>To process payments or handle support cases</li>
+    </ul>
+  </p>
+
+  <h3>Your Rights</h3>
+  <ul>
+    <li>You may request a copy of your stored data</li>
+    <li>You may request your account and data to be deleted</li>
+    <li>You may opt out of non-essential data collection at any time</li>
+  </ul>
+
+  <p>
+    probe-app will never send spam or store data longer than necessary. We retain only the data required for legal, operational, or security purposes.
+  </p>
+</div>
+
+  </div>
+
+  <button class="agree-btn" onclick="window.location.href='/'">Agree to Terms</button>
+
+  <script>
+    function showTab(id) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.querySelector(`[onclick="showTab('${id}')"]`).classList.add('active');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>probe-app | Browse Apps</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="browse.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Orbitron:wght@500;600;700&display=swap" rel="stylesheet">
+   
+</head>
+<body>
+    <nav>
+        <a href="/" class="logo">
+            <img src="https://i.ibb.co/Kxyq4qGh/Gemini-Generated-Image-uyuw4zuyuw4zuyuw-modified.png" alt="Probe App Logo" class="nav-logo-icon">
+            <span>probe-app</span>
+        </a>
+        
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search apps...">
+            <button id="searchButton"><i class="fas fa-search"></i></button>
+            <div id="searchResults" class="search-results">
+                <div class="search-results-header">Search Results</div>
+                <ul class="search-results-list" id="searchResultsList"></ul>
+            </div>
+        </div>
+        
+        <div class="auth-section">
+            <div class="notification-bell" id="notificationBell">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge" id="notificationBadge">0</span>
+            </div>
+            <button id="authButton" class="auth-btn">Sign In</button>
+            <img id="userAvatar" class="user-avatar" src="" alt="User Avatar" style="display: none;">
+        </div>
+
+        <div id="notificationPopup" class="notification-popup">
+            <h3>Notifications</h3>
+            <ul class="notification-list" id="notificationList">
+                <li class="notification-item">
+                    No new notifications
+                </li>
+            </ul>
+        </div>
+
+        <div id="userDropdown" class="user-dropdown">
+            <div class="dropdown-item">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </div>
+            <div class="dropdown-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </div>
+            <div class="dropdown-divider"></div>
+            <div id="signOutBtn" class="dropdown-item">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Sign Out</span>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+       
+        <section class="category-section">
+            <div class="category-header">
+                <h2 class="category-title">Top Rated</h2>
+                <a href="#" class="view-all">View All</a>
+            </div>
+            <div class="app-carousel">
+                <div class="app-carousel-container" id="topRatedCarousel"></div>
+                <div class="carousel-nav carousel-prev" onclick="scrollCarousel('topRatedCarousel', -220)">
+                    <i class="fas fa-chevron-left"></i>
+                </div>
+                <div class="carousel-nav carousel-next" onclick="scrollCarousel('topRatedCarousel', 220)">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </div>
+        </section>
+
+       
+        <section class="category-section">
+            <div class="category-header">
+                <h2 class="category-title">Free Apps</h2>
+                <a href="#" class="view-all">View All</a>
+            </div>
+            <div class="app-carousel">
+                <div class="app-carousel-container" id="freeAppsCarousel"></div>
+                <div class="carousel-nav carousel-prev" onclick="scrollCarousel('freeAppsCarousel', -220)">
+                    <i class="fas fa-chevron-left"></i>
+                </div>
+                <div class="carousel-nav carousel-next" onclick="scrollCarousel('freeAppsCarousel', 220)">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </div>
+        </section>
+
+       
+        <section class="category-section">
+            <div class="category-header">
+                <h2 class="category-title">Under $10</h2>
+                <a href="#" class="view-all">View All</a>
+            </div>
+            <div class="app-carousel">
+                <div class="app-carousel-container" id="under10Carousel"></div>
+                <div class="carousel-nav carousel-prev" onclick="scrollCarousel('under10Carousel', -220)">
+                    <i class="fas fa-chevron-left"></i>
+                </div>
+                <div class="carousel-nav carousel-next" onclick="scrollCarousel('under10Carousel', 220)">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </div>
+        </section>
+
+       
+        <section class="category-section">
+            <div class="category-header">
+                <h2 class="category-title">Premium ($10 - $50)</h2>
+                <a href="#" class="view-all">View All</a>
+            </div>
+            <div class="app-carousel">
+                <div class="app-carousel-container" id="premiumCarousel"></div>
+                <div class="carousel-nav carousel-prev" onclick="scrollCarousel('premiumCarousel', -220)">
+                    <i class="fas fa-chevron-left"></i>
+                </div>
+                <div class="carousel-nav carousel-next" onclick="scrollCarousel('premiumCarousel', 220)">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </div>
+        </section>
+
+      
+        <section class="category-section">
+            <div class="category-header">
+                <h2 class="category-title">New Releases</h2>
+                <a href="#" class="view-all">View All</a>
+            </div>
+            <div class="app-carousel">
+                <div class="app-carousel-container" id="newReleasesCarousel"></div>
+                <div class="carousel-nav carousel-prev" onclick="scrollCarousel('newReleasesCarousel', -220)">
+                    <i class="fas fa-chevron-left"></i>
+                </div>
+                <div class="carousel-nav carousel-next" onclick="scrollCarousel('newReleasesCarousel', 220)">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </div>
+        </section>
+
+    
+        <section class="category-section">
+            <div class="category-header">
+                <h2 class="category-title">Most Downloaded</h2>
+                <a href="#" class="view-all">View All</a>
+            </div>
+            <div class="app-carousel">
+                <div class="app-carousel-container" id="mostDownloadedCarousel"></div>
+                <div class="carousel-nav carousel-prev" onclick="scrollCarousel('mostDownloadedCarousel', -220)">
+                    <i class="fas fa-chevron-left"></i>
+                </div>
+                <div class="carousel-nav carousel-next" onclick="scrollCarousel('mostDownloadedCarousel', 220)">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="/browse.js"></script>
+   
+   
+</body>
+</html>

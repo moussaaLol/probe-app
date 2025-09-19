@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Submit App | Probe-App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <style>
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background-color: #f4f4f9;
+      margin: 0;
+      padding: 0;
+    }
+
+    .navbar {
+      background: white;
+      padding: 16px 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 22px;
+      color: #6A1B9A;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 30px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    }
+
+    h2 {
+      text-align: center;
+      color: #6A1B9A;
+    }
+
+    label {
+      font-weight: 600;
+      margin-top: 15px;
+      display: block;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-family: inherit;
+    }
+
+    textarea {
+      resize: vertical;
+    }
+
+    .form-group {
+      margin-top: 16px;
+    }
+
+    .checkbox {
+      display: flex;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .checkbox input {
+      margin-right: 8px;
+    }
+
+    button {
+      background-color: #6A1B9A;
+      color: white;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 8px;
+      margin-top: 25px;
+      font-size: 16px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    .popup, .overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 999;
+    }
+
+    .overlay {
+      background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .popup {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .popup-content {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      text-align: center;
+      animation: scaleIn 0.3s ease;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+
+    .popup-content h3 {
+      color: #4CAF50;
+      margin-bottom: 10px;
+    }
+
+    .popup-content p {
+      font-size: 14px;
+    }
+
+    .highlight {
+      color: #FFD700;
+      font-weight: bold;
+    }
+
+    @keyframes scaleIn {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="navbar"> Probe-App — Submit App</div>
+
+<div class="container">
+  <h2>Submit Your App</h2>
+  <form id="appForm">
+    <div class="form-group">
+      <label>Title</label>
+      <input type="text" id="title" required />
+    </div>
+
+    <div class="form-group">
+      <label>Description</label>
+      <textarea id="description" rows="4" required></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Publisher / Company</label>
+      <input type="text" id="publisher" required />
+    </div>
+
+    <div class="checkbox">
+      <input type="checkbox" id="isPaid" />
+      <label for="isPaid">Paid App?</label>
+    </div>
+
+    <div class="form-group">
+      <label>Download Link</label>
+      <input type="text" id="download" required />
+    </div>
+
+    <div class="form-group">
+      <label>Thumbnail URL</label>
+      <input type="text" id="thumbnail" required />
+    </div>
+
+    <div class="form-group">
+      <label>Contact Email</label>
+      <input type="email" id="contactEmail" readonly />
+    </div>
+
+    <button type="submit">Submit for Review</button>
+  </form>
+</div>
+
+<div class="overlay" id="overlay"></div>
+<div class="popup" id="popup">
+  <div class="popup-content">
+    <h3>✓ App Received!</h3>
+    <p>We’ve received your app. You’ll be notified at <span class="highlight" id="userEmailDisplay"></span> within 24 hours.</p>
+  </div>
+</div>
+
+<script>
+  const firebaseConfig = {
+      apiKey: "AIzaSyBMUi291fwb-HSxlGPQMxdEJGUTiOOvFBs",
+      authDomain: "nexaverse-eeb07.firebaseapp.com",
+      projectId: "nexaverse-eeb07",
+      storageBucket: "nexaverse-eeb07.appspot.com",
+      messagingSenderId: "686342300627",
+      appId: "1:686342300627:web:90522d8f1129fb00b08526",
+    }; // Your config
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  const auth = firebase.auth();
+
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      document.getElementById("contactEmail").value = user.email;
+    } else {
+      alert("Please log in to submit.");
+      window.location.href = "/login.html";
+    }
+  });
+
+  document.getElementById("appForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const user = firebase.auth().currentUser;
+    if (!user) return;
+
+    const data = {
+      title: document.getElementById("title").value,
+      description: document.getElementById("description").value,
+      publisher: document.getElementById("publisher").value,
+      isPaid: document.getElementById("isPaid").checked,
+      download: document.getElementById("download").value,
+      thumbnail: document.getElementById("thumbnail").value,
+      contactEmail: user.email,
+      submittedBy: user.uid,
+      status: "pending",
+      submittedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    await db.collection("submissions").add(data);
+
+    document.getElementById("userEmailDisplay").textContent = user.email;
+    document.getElementById("popup").style.display = 'flex';
+    document.getElementById("overlay").style.display = 'block';
+  });
+</script>
+
+</body>
+</html>

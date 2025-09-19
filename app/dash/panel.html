@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Submissions | Probe-App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <style>
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+    }
+
+    .navbar {
+      background: #fff;
+      padding: 16px 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 22px;
+      color: #6A1B9A;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+
+    h2 {
+      color: #6A1B9A;
+    }
+
+    .submission {
+      border: 1px solid #ddd;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      cursor: pointer;
+    }
+
+    .popup, .overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 1000;
+    }
+
+    .overlay {
+      background-color: rgba(0,0,0,0.5);
+    }
+
+    .popup {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .popup-content {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+    }
+
+    .popup-content h3 {
+      margin-top: 0;
+      color: #6A1B9A;
+    }
+
+    .popup-content p {
+      margin: 10px 0;
+    }
+
+    .popup-content button {
+      margin-right: 10px;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .accept {
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Submissions | Probe-App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <style>
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+    }
+
+    .navbar {
+      background: #fff;
+      padding: 16px 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 22px;
+      color: #6A1B9A;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+
+    h2 {
+      color: #6A1B9A;
+    }
+
+    .submission {
+      border: 1px solid #ddd;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      cursor: pointer;
+    }
+
+    .popup, .overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 1000;
+    }
+
+    .overlay {
+      background-color: rgba(0,0,0,0.5);
+    }
+
+    .popup {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .popup-content {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+    }
+
+    .popup-content h3 {
+      margin-top: 0;
+      color: #6A1B9A;
+    }
+
+    .popup-content p {
+      margin: 10px 0;
+    }
+
+    .popup-content button {
+      margin-right: 10px;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .accept {
+      background: #4CAF50;
+      color: white;
+    }
+
+    .reject {
+      background: #f44336;
+      color: white;
+    }
+
+    .close {
+      background: gray;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+<div class="navbar">🛠️ Probe-App Admin Review</div>
+
+<div class="container">
+  <h2>Pending Submissions</h2>
+  <div id="submissionList">Loading...</div>
+</div>
+
+<div class="overlay" id="overlay" onclick="closePopup()"></div>
+<div class="popup" id="popup">
+  <div class="popup-content">
+    <h3 id="popupTitle">App Title</h3>
+    <p><strong>Publisher:</strong> <span id="popupPublisher"></span></p>
+    <p><strong>Description:</strong> <span id="popupDescription"></span></p>
+    <p><strong>Download:</strong> <a id="popupDownload" href="#" target="_blank">Link</a></p>
+    <p><strong>Thumbnail:</strong> <a id="popupThumbnail" href="#" target="_blank">Image</a></p>
+    <p><strong>Is Paid:</strong> <span id="popupPaid"></span></p>
+    <p><strong>User Email:</strong> <span id="popupEmail"></span></p>
+    <button class="accept" onclick="acceptApp()">Accept</button>
+    <button class="reject" onclick="rejectApp()">Reject</button>
+    <button class="close" onclick="closePopup()">Close</button>
+  </div>
+</div>
+
+<script>
+  const firebaseConfig = {
+      apiKey: "AIzaSyBMUi291fwb-HSxlGPQMxdEJGUTiOOvFBs",
+      authDomain: "nexaverse-eeb07.firebaseapp.com",
+      projectId: "nexaverse-eeb07",
+      storageBucket: "nexaverse-eeb07.appspot.com",
+      messagingSenderId: "686342300627",
+      appId: "1:686342300627:web:90522d8f1129fb00b08526",
+    }; // Your config
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  const auth = firebase.auth();
+
+  let currentDocId = null;
+  let currentData = null;
+
+  auth.onAuthStateChanged(async (user) => {
+    if (!user) return window.location.href = "/login.html";
+
+    const userDoc = await db.collection("users").doc(user.uid).get();
+    if (!userDoc.exists || userDoc.data().role !== "admin") {
+      alert("You are not authorized.");
+      return window.location.href = "/";
+    }
+
+    const subs = await db.collection("submissions").where("status", "==", "pending").get();
+    const list = document.getElementById("submissionList");
+    list.innerHTML = "";
+
+    subs.forEach(doc => {
+      const data = doc.data();
+      const div = document.createElement("div");
+      div.className = "submission";
+      div.innerHTML = `<strong>${data.title}</strong> by ${data.publisher}`;
+      div.onclick = () => openPopup(doc.id, data);
+      list.appendChild(div);
+    });
+
+    if (subs.empty) list.textContent = "No pending submissions.";
+  });
+
+  function openPopup(docId, data) {
+    currentDocId = docId;
+    currentData = data;
+    document.getElementById("popupTitle").textContent = data.title;
+    document.getElementById("popupPublisher").textContent = data.publisher;
+    document.getElementById("popupDescription").textContent = data.description;
+    document.getElementById("popupDownload").href = data.download;
+    document.getElementById("popupThumbnail").href = data.thumbnail;
+    document.getElementById("popupPaid").textContent = data.isPaid ? "Yes" : "No";
+    document.getElementById("popupEmail").textContent = data.contactEmail;
+    document.getElementById("popup").style.display = "flex";
+    document.getElementById("overlay").style.display = "block";
+  }
+
+  function closePopup() {
+    document.getElementById("popup").style.display = "none";
+    document.getElementById("overlay").style.display = "none";
+  }
+
+  async function acceptApp() {
+    if (!currentDocId || !currentData) return;
+
+    await db.collection("apps").add({
+      title: currentData.title,
+      description: currentData.description,
+      publisher: currentData.publisher,
+      isPaid: currentData.isPaid,
+      price: currentData.isPaid ? 999 : 0,
+      download: currentData.download,
+      thumbnail: currentData.thumbnail,
+      contactEmail: currentData.contactEmail,
+      creator: null,
+      averageRating: 0,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    await db.collection("submissions").doc(currentDocId).update({ status: "approved" });
+    alert("App approved and added!");
+    window.location.reload();
+  }
+
+  async function rejectApp() {
+    if (!currentDocId) return;
+    await db.collection("submissions").doc(currentDocId).update({ status: "rejected" });
+    alert("App rejected.");
+    window.location.reload();
+  }
+</script>
+
+</body>
+</html>
+</body>
+</html>

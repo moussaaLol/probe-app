@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>probe-app | Submit App</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Orbitron:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Base Styles */
+        :root {
+            --primary-color: #6A1B9A;
+            --secondary-color: #D81B60;
+            --dark-text: #212121;
+            --light-bg: #F3E5F5;
+            --white: #FFFFFF;
+            --black: #000000;
+            --gray-light: #EEEEEE;
+            --gray-medium: #757575;
+            --success-color: #4CAF50;
+            --gradient-bg: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            color: var(--dark-text);
+            font-family: 'Montserrat', sans-serif;
+            overflow-x: hidden;
+            background-color: var(--white);
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 5%;
+            background-color: var(--white);
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+            position: relative;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            text-decoration: none;
+            letter-spacing: 1.5px;
+        }
+
+        .nav-logo-icon {
+            height: 40px;
+            width: auto;
+            margin-right: 12px;
+        }
+        
+        .auth-section {
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .auth-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-family: 'Montserrat', sans-serif;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 12px rgba(106, 27, 154, 0.25);
+        }
+
+        .user-avatar {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            cursor: pointer;
+            object-fit: cover;
+            border: 2px solid var(--primary-color);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(106, 27, 154, 0.2);
+            margin-left: 20px;
+        }
+
+        /* Notification Bell */
+        .notification-bell {
+            position: relative;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            cursor: pointer;
+            transition: color 0.3s ease;
+            margin-right: 15px;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--secondary-color);
+            color: var(--white);
+            border-radius: 50%;
+            padding: 3px 7px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            line-height: 1;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        /* User Dropdown */
+        .user-dropdown {
+            display: none;
+            position: absolute;
+            top: 80px;
+            right: 5%;
+            background-color: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            width: 240px;
+            z-index: 100;
+            overflow: hidden;
+            transform: translateY(10px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .user-dropdown.show {
+            display: block;
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .dropdown-item {
+            padding: 14px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: var(--dark-text);
+            display: flex;
+            align-items: center;
+            font-size: 0.95rem;
+        }
+
+        .dropdown-item i {
+            margin-right: 12px;
+            width: 20px;
+            text-align: center;
+            color: var(--primary-color);
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--light-bg);
+            color: var(--primary-color);
+            padding-left: 25px;
+        }
+
+        /* Main Content */
+        .submission-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 5%;
+        }
+
+        .page-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        /* Submission Form */
+        .submission-form {
+            background-color: var(--light-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--gray-light);
+            border-radius: 8px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(106, 27, 154, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .char-count {
+            font-size: 0.8rem;
+            color: var(--gray-medium);
+            text-align: right;
+            margin-top: 5px;
+        }
+
+        .file-upload {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            border: 2px dashed var(--gray-light);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-upload:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(106, 27, 154, 0.05);
+        }
+
+        .file-upload i {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .file-upload-text {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .file-name {
+            font-size: 0.9rem;
+            color: var(--primary-color);
+            margin-top: 10px;
+            font-weight: 600;
+            display: none;
+        }
+
+        .submit-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(106, 27, 154, 0.25);
+            display: block;
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(216, 27, 96, 0.3);
+        }
+
+        /* Success Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+            animation: fadeIn 0.3s;
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.show .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            color: var(--success-color);
+            margin-bottom: 20px;
+            animation: checkmark 0.5s ease-in-out;
+        }
+
+        .modal-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .modal-message {
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .modal-email {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .modal-close-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .modal-close-btn:hover {
+            background-color: var(--secondary-color);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes checkmark {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.2); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 1.5rem;
+            }
+            
+            .submission-form {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/" class="logo">
+            <img src="https://i.ibb.co/Kxyq4qGh/Gemini-Generated-Image-uyuw4zuyuw4zuyuw-modified.png" alt="Probe App Logo" class="nav-logo-icon">
+            <span>probe-app</span>
+        </a>
+        
+        <div class="auth-section">
+            <div class="notification-bell" id="notificationBell">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge" id="notificationBadge">0</span>
+            </div>
+            <button id="authButton" class="auth-btn">Sign In</button>
+            <img id="userAvatar" class="user-avatar" src="" alt="User Avatar" style="display: none;">
+        </div>
+
+        
+
+        <div id="userDropdown" class="user-dropdown">
+            <div class="dropdown-item">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </div>
+            <div class="dropdown-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </div>
+            <div class="dropdown-divider"></div>
+            <div id="signOutBtn" class="dropdown-item">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Sign Out</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="submission-container">
+        <h1 class="page-title">Submit Your App</h1>
+        
+        <form class="submission-form" id="appSubmissionForm">
+            <div class="form-group">
+                <label for="appTitle" class="form-label">App Title</label>
+                <input type="text" id="appTitle" class="form-input" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="appDescription" class="form-label">Short Description (max 100 characters)</label>
+                <textarea id="appDescription" class="form-input form-textarea" maxlength="100" required></textarea>
+                <div class="char-count"><span id="charCount">0</span>/100</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="publisherName" class="form-label">Publisher Name</label>
+                <input type="text" id="publisherName" class="form-input" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="contactEmail" class="form-label">Contact Email</label>
+                <input type="email" id="contactEmail" class="form-input" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">App Thumbnail</label>
+                <div class="file-upload" id="thumbnailUpload">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <div class="file-upload-text">Click to upload thumbnail image</div>
+                    <div class="file-name" id="thumbnailFileName"></div>
+                    <input type="file" id="thumbnailInput" accept="image/*" style="display: none;">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">APK File</label>
+                <div class="file-upload" id="apkUpload">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <div class="file-upload-text">Click to upload APK file</div>
+                    <div class="file-name" id="apkFileName"></div>
+                    <input type="file" id="apkInput" accept=".apk" style="display: none;">
+                </div>
+            </div>
+            
+            <button type="submit" class="submit-btn" id="submitBtn">
+                <i class="fas fa-paper-plane"></i> Send for Approval
+            </button>
+        </form>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal-overlay" id="successModal">
+        <div class="modal-content">
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h2 class="modal-title">Submission Successful!</h2>
+            <p class="modal-message">
+                Your app has been sent for approval. We will reach out to you within 24h via email.
+                <br><br>
+                Check <span class="modal-email" id="modalEmail"></span> for updates.
+            </p>
+            <button class="modal-close-btn" id="modalCloseBtn">Close</button>
+        </div>
+    </div>
+
+    <script>
+// Firebase Configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyBMUi291fwb-HSxlGPQMxdEJGUTiOOvFBs",
+    authDomain: "nexaverse-eeb07.firebaseapp.com",
+    projectId: "nexaverse-eeb07",
+    storageBucket: "nexaverse-eeb07.appspot.com",
+    messagingSenderId: "686342300627",
+    appId: "1:686342300627:web:90522d8f1129fb00b08526",
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+const storage = firebase.storage();
+
+// DOM Elements
+const authButton = document.getElementById('authButton');
+const userAvatar = document.getElementById('userAvatar');
+const userDropdown = document.getElementById('userDropdown');
+const notificationBell = document.getElementById('notificationBell');
+const notificationBadge = document.getElementById('notificationBadge');
+const notificationPopup = document.getElementById('notificationPopup');
+const notificationList = document.getElementById('notificationList');
+const signOutBtn = document.getElementById('signOutBtn');
+const appSubmissionForm = document.getElementById('appSubmissionForm');
+const submitBtn = document.getElementById('submitBtn');
+const successModal = document.getElementById('successModal');
+const modalEmail = document.getElementById('modalEmail');
+const modalCloseBtn = document.getElementById('modalCloseBtn');
+
+// Discord Webhook URL (decoded)
+const DISCORD_WEBHOOK_URL = 'https://l.webhook.party/hook/2qAuSmcvDcC04P97sfMdLbW9SQrbO9a9wKMfwqrV68LdbABBC+wpOrb6g5MWbNRR+gS8dcHbSIRbNWfouABeWRwLnowFKNoxJ8Pvag2Ztx+o/stIkt+2GBCMRSMYIbV4GATCVdWHBHz0a70rBpiutsIiTO3omYwy+AS8KWmRUWUXBnHg/HBFarfID6SwT/BN2Uh1AaqBU6POHMDf5VFvdHLMkEA0X/GbR4KSElb7/mAIe3NJc404HAZdtoLdGK24WVFWgUX7ti9TCG0HmaG0rG4szJ6l9aocnhn/XO5yfX7BGMrb70XKYH/uCRU/DSQ3lxpq9vAXtmCgmKjq8U8dsoIv0iIaCmOwonVcUjmxol3W9dAOOJ38s3tx32MPUuEB1so1l9HhVEQ=/df1XvNoTjYHb/9o/';
+
+// Form submission
+appSubmissionForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    if (!auth.currentUser) {
+        alert('Please sign in to submit an app.');
+        return;
+    }
+
+    // Validate form
+    const thumbnailFile = document.getElementById('thumbnailInput').files[0];
+    const apkFile = document.getElementById('apkInput').files[0];
+    
+    if (!thumbnailFile) {
+        alert('Please upload a thumbnail image.');
+        return;
+    }
+
+    if (!apkFile) {
+        alert('Please upload an APK file.');
+        return;
+    }
+
+    // Disable submit button
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+
+    try {
+        const userId = auth.currentUser.uid;
+        const userEmail = auth.currentUser.email;
+        const timestamp = firebase.firestore.FieldValue.serverTimestamp();
+        
+        // 1. Upload thumbnail
+        const thumbnailRef = storage.ref(`submissions/${userId}/${Date.now()}_${thumbnailFile.name}`);
+        const thumbnailSnapshot = await thumbnailRef.put(thumbnailFile);
+        const thumbnailUrl = await thumbnailSnapshot.ref.getDownloadURL();
+        
+        // 2. Upload APK
+        const apkRef = storage.ref(`submissions/${userId}/${Date.now()}_${apkFile.name}`);
+        const apkSnapshot = await apkRef.put(apkFile);
+        const apkUrl = await apkSnapshot.ref.getDownloadURL();
+        
+        // 3. Create submission document
+        const submissionData = {
+            title: document.getElementById('appTitle').value,
+            description: document.getElementById('appDescription').value,
+            publisher: document.getElementById('publisherName').value,
+            contactEmail: document.getElementById('contactEmail').value,
+            thumbnailUrl: thumbnailUrl,
+            apkUrl: apkUrl,
+            userId: userId,
+            userEmail: userEmail,
+            status: 'pending',
+            createdAt: timestamp,
+            updatedAt: timestamp
+        };
+        
+        // 4. Save to Firestore
+        await db.collection('submissions').add(submissionData);
+        
+        // 5. Send to Discord webhook (with error handling)
+        try {
+            const embed = {
+                title: 'New App Submission',
+                color: 0x6A1B9A,
+                fields: [
+                    { name: 'App Title', value: submissionData.title },
+                    { name: 'Publisher', value: submissionData.publisher },
+                    { name: 'Description', value: submissionData.description },
+                    { name: 'Contact Email', value: submissionData.contactEmail },
+                    { name: 'Submitted By', value: userEmail },
+                    { name: 'Thumbnail', value: `[View](${thumbnailUrl})` },
+                    { name: 'APK', value: `[Download](${apkUrl})` }
+                ],
+                timestamp: new Date().toISOString()
+            };
+
+            const response = await fetch(DISCORD_WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ embeds: [embed] })
+            });
+
+            if (!response.ok) {
+                console.error('Discord webhook error:', response.status);
+            }
+        } catch (webhookError) {
+            console.error('Webhook failed (non-critical):', webhookError);
+        }
+        
+        // 6. Show success modal
+        modalEmail.textContent = userEmail;
+        successModal.classList.add('show');
+        
+        // 7. Reset form
+        appSubmissionForm.reset();
+        document.getElementById('thumbnailFileName').style.display = 'none';
+        document.getElementById('apkFileName').style.display = 'none';
+        document.getElementById('charCount').textContent = '0';
+        
+    } catch (error) {
+        console.error('Submission error:', error);
+        alert('Submission failed. Please check console for details.');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send for Approval';
+    }
+});
+
+// Modal close button
+modalCloseBtn.addEventListener('click', () => {
+    successModal.classList.remove('show');
+});
+
+// Auth state listener
+auth.onAuthStateChanged(user => {
+    if (user) {
+        authButton.style.display = 'none';
+        userAvatar.src = user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName || user.email}&background=6A1B9A&color=FFFFFF&bold=true`;
+        userAvatar.style.display = 'block';
+        
+        // Pre-fill email if available
+        document.getElementById('contactEmail').value = user.email || '';
+    } else {
+        authButton.style.display = 'block';
+        userAvatar.style.display = 'none';
+        window.location.href = '/login'; // Redirect if not logged in
+    }
+});
+
+// Other event listeners (notification, dropdown, etc.) remain the same
+        // Event listeners
+        notificationBell.addEventListener('click', () => {
+            notificationPopup.classList.toggle('show');
+        });
+
+        userAvatar.addEventListener('click', (e) => {
+            e.stopPropagation();
+            userDropdown.classList.toggle('show');
+        });
+
+        signOutBtn.addEventListener('click', () => {
+            auth.signOut().then(() => {
+                userDropdown.classList.remove('show');
+            });
+        });
+
+        // Close dropdowns when clicking outside
+        window.addEventListener('click', (e) => {
+            if (!e.target.closest('.notification-bell') && !e.target.closest('.notification-popup')) {
+                notificationPopup.classList.remove('show');
+            }
+            
+            if (!e.target.closest('.user-avatar') && !e.target.closest('.user-dropdown')) {
+                userDropdown.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>

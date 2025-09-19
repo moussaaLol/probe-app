@@ -1,0 +1,1776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>probe-app</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Orbitron:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* New Theme Colors - Modern & Sleek */
+        :root {
+            --primary-color: #6A1B9A; /* Deep Purple */
+            --secondary-color: #D81B60; /* Vibrant Pink */
+            --dark-text: #212121; /* Dark Gray */
+            --light-bg: #F3E5F5; /* Light Purple */
+            --white: #FFFFFF;
+            --black: #000000;
+            --gray-light: #EEEEEE;
+            --gray-medium: #757575;
+            --gradient-bg: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            color: var(--dark-text);
+            font-family: 'Montserrat', sans-serif;
+            overflow-x: hidden;
+            position: relative; /* Needed for absolute positioning of background */
+            min-height: 100vh; /* Ensure body takes full height for background */
+            background-color: var(--white); /* Fallback */
+        }
+
+        /* Full-page background with gradient and repeating logo */
+        .full-page-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-bg);
+            z-index: -2; /* Behind everything */
+            overflow: hidden;
+        }
+
+        .full-page-background::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://i.ibb.co/Kxyq4qGh/Gemini-Generated-Image-uyuw4zuyuw4zuyuw-modified.png'); /* Your logo */
+            background-repeat: repeat;
+            background-size: 150px; /* Adjust size of repeating logo */
+            opacity: 0.05; /* Make it very subtle */
+            animation: backgroundPan 60s linear infinite; /* Slow pan for effect */
+        }
+
+        @keyframes backgroundPan {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 100% 100%; }
+        }
+
+        /* Enhanced Tech Reveal Animation (Splash Screen) */
+        .tech-reveal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-bg); /* Use defined gradient */
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            animation: revealFade 2.2s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+            overflow: hidden; /* Ensure clouds don't cause scrollbars */
+        }
+
+        .tech-grid {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background:
+                linear-gradient(rgba(255, 255, 255, 0.15) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.15) 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0;
+            animation: gridFade 2s 0.5s forwards;
+        }
+
+        .probe-logo {
+            width: 180px;
+            height: 180px;
+            background-color: transparent;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: none;
+            position: relative;
+            z-index: 2;
+            transform: scale(0);
+            animation: logoScale 1.2s 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .probe-logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 50%;
+        }
+
+        .particle {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            opacity: 0;
+            animation: particleFloat 4s infinite ease-in-out;
+        }
+
+        /* Cloud Animation Styles */
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.7); /* Slightly transparent white */
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            animation: cloudMove 15s linear infinite;
+        }
+
+        .cloud:nth-child(1) {
+            width: 120px; height: 60px;
+            top: 20%; left: -10%;
+            animation-duration: 20s;
+            animation-delay: 0s;
+        }
+        .cloud:nth-child(2) {
+            width: 80px; height: 40px;
+            top: 50%; left: -5%;
+            animation-duration: 18s;
+            animation-delay: 3s;
+        }
+        .cloud:nth-child(3) {
+            width: 100px; height: 50px;
+            top: 70%; left: -15%;
+            animation-duration: 22s;
+            animation-delay: 6s;
+        }
+        .cloud:nth-child(4) {
+            width: 90px; height: 45px;
+            top: 35%; left: -20%;
+            animation-duration: 19s;
+            animation-delay: 9s;
+        }
+        .cloud:nth-child(5) {
+            width: 110px; height: 55px;
+            top: 10%; left: -25%;
+            animation-duration: 21s;
+            animation-delay: 12s;
+        }
+
+        @keyframes revealFade {
+            0% { opacity: 1; }
+            80% { opacity: 0.9; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+
+        @keyframes gridFade {
+            from { opacity: 0; }
+            to { opacity: 0.6; }
+        }
+
+        @keyframes logoScale {
+            0% { transform: scale(0); }
+            70% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes particleFloat {
+            0%, 100% {
+                transform: translate(0, 0);
+                opacity: 0;
+            }
+            50% {
+                transform: translate(var(--tx), var(--ty));
+                opacity: 0.7;
+            }
+        }
+
+        @keyframes cloudMove {
+            0% { transform: translateX(0); opacity: 0.7; }
+            100% { transform: translateX(150vw); opacity: 0; }
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 5%;
+            background-color: var(--white);
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+            position: relative;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            text-decoration: none;
+            letter-spacing: 1.5px;
+        }
+
+        .nav-logo-icon {
+            height: 40px;
+            width: auto;
+            margin-right: 12px;
+        }
+
+        .auth-section {
+            display: flex;
+            align-items: center;
+            position: relative; /* For notification bell positioning */
+        }
+
+        .auth-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-family: 'Montserrat', sans-serif;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 12px rgba(106, 27, 154, 0.25);
+        }
+
+        .auth-btn:hover {
+            background-color: #8E24AA; /* Darker purple */
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(106, 27, 154, 0.35);
+        }
+
+        .user-avatar {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            cursor: pointer;
+            object-fit: cover;
+            border: 2px solid var(--primary-color);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(106, 27, 154, 0.2);
+            margin-left: 20px; /* Space from bell */
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(106, 27, 154, 0.3);
+        }
+
+        /* Notification Bell */
+        .notification-bell {
+            position: relative;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .notification-bell:hover {
+            color: var(--secondary-color);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--secondary-color);
+            color: var(--white);
+            border-radius: 50%;
+            padding: 3px 7px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            line-height: 1;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        /* Notification Pop-up */
+        .notification-popup {
+            display: none;
+            position: absolute;
+            top: 60px; /* Adjust based on nav height */
+            right: 0;
+            background-color: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            width: 320px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 99;
+            transform: translateY(10px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .notification-popup.show {
+            display: block;
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .notification-popup h3 {
+            padding: 15px 20px;
+            margin-bottom: 0;
+            border-bottom: 1px solid var(--gray-light);
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+
+        .notification-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .notification-item {
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--gray-light);
+            font-size: 0.9rem;
+            color: var(--dark-text);
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+
+        .notification-item.unread {
+            background-color: var(--light-bg);
+            font-weight: 600;
+        }
+
+        .notification-item:hover {
+            background-color: rgba(106, 27, 154, 0.05);
+        }
+
+        .notification-item small {
+            display: block;
+            color: var(--gray-medium);
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
+
+        .no-notifications {
+            padding: 20px;
+            text-align: center;
+            color: var(--gray-medium);
+        }
+
+        /* Auth Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1001;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+            opacity: 0; /* Start hidden for transition */
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.show {
+            opacity: 1;
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 420px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            position: relative;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: transform 0.4s ease, opacity 0.4s ease;
+        }
+
+        .modal.show .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--dark-text);
+            transition: all 0.3s ease;
+            background: none;
+            border: none;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .close-modal:hover {
+            color: var(--secondary-color);
+            background-color: rgba(216, 27, 96, 0.1);
+            transform: rotate(90deg);
+        }
+
+        .auth-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .auth-tab {
+            flex: 1;
+            text-align: center;
+            padding: 18px 0;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--dark-text);
+            font-family: 'Montserrat', sans-serif;
+            letter-spacing: 0.5px;
+            position: relative;
+            transition: all 0.3s ease;
+            opacity: 0.7;
+        }
+
+        .auth-tab.active {
+            opacity: 1;
+            color: var(--primary-color);
+        }
+
+        .auth-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--primary-color);
+            border-radius: 3px 3px 0 0;
+        }
+
+        .auth-form-container {
+            padding: 30px;
+        }
+
+        .auth-form {
+            display: none;
+            /* No animation here, controlled by JS */
+        }
+
+        .auth-form.active {
+            display: block;
+            /* No animation here, controlled by JS */
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark-text);
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid var(--gray-light);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background-color: var(--light-bg);
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(106, 27, 154, 0.15);
+            background-color: var(--white);
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+        }
+
+        .submit-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: 'Montserrat', sans-serif;
+            letter-spacing: 0.5px;
+            margin-top: 10px;
+        }
+
+        .submit-btn:hover {
+            background-color: #8E24AA;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(106, 27, 154, 0.25);
+        }
+
+        .github-auth {
+            background-color: var(--black);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .github-auth i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .github-auth:hover {
+            background-color: #222;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        /* User dropdown */
+        .user-dropdown {
+            display: none;
+            position: absolute;
+            top: 80px;
+            right: 5%;
+            background-color: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            width: 240px;
+            z-index: 100;
+            overflow: hidden;
+            transform: translateY(10px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .user-dropdown.show {
+            display: block;
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .dropdown-item {
+            padding: 14px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: var(--dark-text);
+            display: flex;
+            align-items: center;
+            font-size: 0.95rem;
+        }
+
+        .dropdown-item i {
+            margin-right: 12px;
+            width: 20px;
+            text-align: center;
+            color: var(--primary-color);
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--light-bg);
+            color: var(--primary-color);
+            padding-left: 25px;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background-color: var(--gray-light);
+            margin: 5px 0;
+        }
+
+        /* Main Content */
+        main {
+            padding: 60px 5%;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative; /* Ensure it's above the fixed background */
+            z-index: 1;
+            background-color: transparent; /* Allow background to show through */
+        }
+
+        .hero {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: calc(100vh - 120px); /* Adjust based on nav/footer height */
+            color: var(--white); /* Text color for hero section on gradient background */
+        }
+
+        /* Hide elements within hero as requested */
+        .hero h1, .hero p {
+            display: none;
+        }
+
+        .hero #startNowBtn { /* Specific ID for the new button */
+            background-color: var(--white);
+            color: var(--primary-color);
+            border: none;
+            padding: 18px 40px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1.3rem;
+            transition: all 0.3s ease;
+            font-family: 'Montserrat', sans-serif;
+            letter-spacing: 1px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+            text-decoration: none; /* Make sure it doesn't look like a link */
+            display: inline-block; /* Allows padding and transformation */
+            margin-top: 0; /* Override any previous margin-top */
+        }
+
+        .hero #startNowBtn:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            background-color: var(--light-bg);
+        }
+
+        .hero .welcome-message {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.8rem;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 30px;
+            text-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInWelcome 1s 2s forwards; /* Delay the animation */
+        }
+
+        .hero .tagline {
+            font-size: 1.4rem;
+            color: rgba(255, 255, 255, 0.9);
+            max-width: 800px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInTagline 1s 2.5s forwards; /* Delay further */
+        }
+
+        @keyframes fadeInWelcome {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInTagline {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .features-section {
+            background-color: var(--white);
+            padding: 80px 5%;
+            margin-top: 50px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+
+        .features-section h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.8rem;
+            color: var(--primary-color);
+            margin-bottom: 60px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .features-section h2::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: -15px;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background-color: var(--secondary-color);
+            border-radius: 2px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+        }
+
+        .feature-card {
+            background-color: var(--light-bg);
+            border-radius: 16px;
+            padding: 35px 30px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(106, 27, 154, 0.1);
+            text-align: center;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(106, 27, 154, 0.15);
+            border-color: rgba(106, 27, 154, 0.3);
+        }
+
+        .feature-icon {
+            font-size: 3.2rem;
+            color: var(--primary-color);
+            margin-bottom: 25px;
+        }
+
+        .feature-card h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            margin-bottom: 18px;
+            color: var(--dark-text);
+            letter-spacing: 1px;
+        }
+
+        .feature-card p {
+            color: var(--gray-medium);
+            line-height: 1.7;
+            font-size: 1.05rem;
+        }
+
+        .cta-section {
+            text-align: center;
+            background: var(--gradient-bg);
+            padding: 70px 40px;
+            border-radius: 16px;
+            color: var(--white);
+            margin-top: 80px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            animation: ctaPulse 8s infinite linear;
+        }
+
+        .cta-section h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.8rem;
+            margin-bottom: 25px;
+            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .cta-section p {
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .cta-button {
+            background-color: var(--white);
+            color: var(--primary-color);
+            border: none;
+            padding: 16px 35px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            font-family: 'Montserrat', sans-serif;
+            letter-spacing: 0.8px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            background-color: var(--light-bg);
+        }
+
+        @keyframes ctaPulse {
+            0% { transform: scale(0.8); opacity: 0.7; }
+            50% { transform: scale(1.2); opacity: 0.3; }
+            100% { transform: scale(0.8); opacity: 0.7; }
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--dark-text);
+            color: var(--white);
+            padding: 40px 5%;
+            text-align: center;
+            font-size: 0.9rem;
+            margin-top: 50px;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+            box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer-links {
+            margin-top: 15px;
+        }
+
+        .footer-links a {
+            color: var(--light-bg);
+            text-decoration: none;
+            margin: 0 15px;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--secondary-color);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                padding: 15px 5%;
+            }
+
+            .logo {
+                margin-bottom: 15px;
+            }
+
+            .auth-section {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .auth-btn, .user-avatar {
+                margin: 0 10px;
+            }
+
+            .hero .welcome-message {
+                font-size: 2.8rem;
+            }
+
+            .hero .tagline {
+                font-size: 1.1rem;
+            }
+
+            .features-section {
+                padding: 60px 5%;
+            }
+
+            .features-section h2 {
+                font-size: 2.2rem;
+            }
+
+            .feature-card {
+                padding: 25px 20px;
+            }
+
+            .feature-card h3 {
+                font-size: 1.5rem;
+            }
+
+            .feature-card p {
+                font-size: 0.95rem;
+            }
+
+            .cta-section {
+                padding: 50px 20px;
+            }
+
+            .cta-section h2 {
+                font-size: 2.2rem;
+            }
+
+            .cta-section p {
+                font-size: 1rem;
+            }
+
+            .cta-button {
+                padding: 14px 30px;
+                font-size: 1rem;
+            }
+
+            .modal-content {
+                width: 95%;
+            }
+
+            .auth-form-container {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo {
+                font-size: 1.5rem;
+            }
+
+            .nav-logo-icon {
+                height: 30px;
+            }
+
+            .auth-btn {
+                padding: 8px 18px;
+                font-size: 0.9rem;
+            }
+
+            .user-avatar {
+                width: 40px;
+                height: 40px;
+            }
+
+            .notification-popup {
+                width: 280px;
+                right: 2%;
+            }
+
+            .hero .welcome-message {
+                font-size: 2rem;
+            }
+
+            .hero .tagline {
+                font-size: 0.9rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="full-page-background">
+        <div class="cloud"></div>
+        <div class="cloud"></div>
+        <div class="cloud"></div>
+        <div class="cloud"></div>
+        <div class="cloud"></div>
+    </div>
+
+    <div class="tech-reveal">
+        <div class="tech-grid"></div>
+        <div class="probe-logo">
+            <img src="https://i.ibb.co/Kxyq4qGh/Gemini-Generated-Image-uyuw4zuyuw4zuyuw-modified.png" alt="Probe App Logo" class="probe-logo-img">
+        </div>
+        </div>
+
+    <nav>
+        <a href="#" class="logo">
+            <img src="https://i.ibb.co/Kxyq4qGh/Gemini-Generated-Image-uyuw4zuyuw4zuyuw-modified.png" alt="Logo" class="nav-logo-icon">
+            PROBE
+        </a>
+        <div class="auth-section">
+            <div class="notification-bell" id="notificationBell">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
+            </div>
+            <div class="notification-popup" id="notificationPopup">
+                <h3>Notifications</h3>
+                <ul class="notification-list" id="notificationList">
+                    </ul>
+                <p class="no-notifications" id="noNotificationsMessage">No new notifications.</p>
+            </div>
+
+            <button class="auth-btn" id="authBtn">Sign In</button>
+            <img src="https://via.placeholder.com/46" alt="User Avatar" class="user-avatar" id="userAvatar" style="display: none;">
+            
+            <div class="user-dropdown" id="userDropdown">
+                <div class="dropdown-item" id="myAppsLink">
+                    <i class="fas fa-th-large"></i> My Apps
+                </div>
+                <div class="dropdown-item" id="profileLink">
+                    <i class="fas fa-user-circle"></i> Profile
+                </div>
+                <div class="dropdown-divider"></div>
+                <div class="dropdown-item" id="signOutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Sign Out
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <section class="hero">
+            <h1 class="welcome-message">Welcome to Probe!</h1>
+            <p class="tagline">Explore, create, and manage your applications with ease.</p>
+            <a href="#features" class="hero-button" id="startNowBtn">Get Started</a>
+        </section>
+
+        <section class="features-section" id="features">
+            <h2>Our Features</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fas fa-rocket feature-icon"></i>
+                    <h3>Blazing Fast</h3>
+                    <p>Experience unparalleled speed and responsiveness with our optimized platform.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-code feature-icon"></i>
+                    <h3>Easy Integration</h3>
+                    <p>Seamlessly integrate your existing tools and workflows with our flexible APIs.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-shield-alt feature-icon"></i>
+                    <h3>Secure & Reliable</h3>
+                    <p>Your data is protected with enterprise-grade security and robust infrastructure.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-cogs feature-icon"></i>
+                    <h3>Customizable</h3>
+                    <p>Tailor the platform to your exact needs with extensive customization options.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta-section">
+            <h2>Ready to Launch Your Next Big Idea?</h2>
+            <p>Join thousands of innovators and start building with Probe today!</p>
+            <a href="#" class="cta-button" id="joinNowCta">Join Now</a>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Probe App. All rights reserved.</p>
+        <div class="footer-links">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+            <a href="#">Contact Us</a>
+        </div>
+    </footer>
+
+    <div class="modal" id="authModal">
+        <div class="modal-content">
+            <button class="close-modal" id="closeModal">&times;</button>
+            <div class="auth-tabs">
+                <div class="auth-tab active" id="signInTab">Sign In</div>
+                <div class="auth-tab" id="signUpTab">Sign Up</div>
+            </div>
+            <div class="auth-form-container">
+                <form class="auth-form active" id="signInForm">
+                    <div class="form-group">
+                        <label for="signInEmail">Email</label>
+                        <input type="email" id="signInEmail" placeholder="your.email@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signInPassword">Password</label>
+                        <input type="password" id="signInPassword" placeholder="********" required>
+                    </div>
+                    <button type="submit" class="submit-btn">Sign In</button>
+                    <button type="button" class="github-auth" id="githubSignIn"><i class="fab fa-github"></i> Sign In with GitHub</button>
+                </form>
+
+                <form class="auth-form" id="signUpForm">
+                    <div class="form-group">
+                        <label for="signUpEmail">Email</label>
+                        <input type="email" id="signUpEmail" placeholder="your.email@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signUpPassword">Password</label>
+                        <input type="password" id="signUpPassword" placeholder="********" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <input type="password" id="confirmPassword" placeholder="********" required>
+                    </div>
+                    <button type="submit" class="submit-btn">Sign Up</button>
+                    <button type="button" class="github-auth" id="githubSignUp"><i class="fab fa-github"></i> Sign Up with GitHub</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="appManagementModal">
+        <div class="modal-content">
+            <button class="close-modal" id="closeAppManagementModal">&times;</button>
+            <div class="auth-form-container">
+                <h2 style="text-align: center; color: var(--primary-color); font-family: 'Orbitron', sans-serif; margin-bottom: 25px;">My Apps</h2>
+                <div id="noAppsMessage" style="text-align: center; color: var(--gray-medium); display: none;">No apps created yet. Create one below!</div>
+                <div id="appList" class="app-list">
+                    </div>
+                <button class="submit-btn" id="openCreateAppModalBtn" style="margin-top: 20px;">Create New App</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="createEditAppModal">
+        <div class="modal-content">
+            <button class="close-modal" id="closeCreateEditAppModal">&times;</button>
+            <div class="auth-form-container">
+                <h2 id="appModalTitle" style="text-align: center; color: var(--primary-color); font-family: 'Orbitron', sans-serif; margin-bottom: 25px;">Create New App</h2>
+                <form id="appForm">
+                    <input type="hidden" id="appId">
+                    <div class="form-group">
+                        <label for="appName">App Name</label>
+                        <input type="text" id="appName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="appDescription">Description</label>
+                        <textarea id="appDescription"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="appIcon">Icon URL</label>
+                        <input type="url" id="appIcon" placeholder="https://example.com/icon.png">
+                    </div>
+                    <button type="submit" class="submit-btn" id="saveAppBtn">Save App</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="confirmDeleteModal">
+        <div class="modal-content">
+            <div class="auth-form-container" style="text-align: center;">
+                <h2 style="color: var(--primary-color); font-family: 'Orbitron', sans-serif; margin-bottom: 20px;">Confirm Deletion</h2>
+                <p style="margin-bottom: 30px; color: var(--dark-text);">Are you sure you want to delete "<span id="appToDeleteName" style="font-weight: 600;"></span>"? This action cannot be undone.</p>
+                <button class="submit-btn" id="confirmDeleteBtn" style="background-color: var(--secondary-color);">Delete App</button>
+                <button class="submit-btn" id="cancelDeleteBtn" style="background-color: var(--gray-medium); margin-top: 15px;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script>
+        // Your Firebase configuration
+        const firebaseConfig = {
+      apiKey: "AIzaSyBMUi291fwb-HSxlGPQMxdEJGUTiOOvFBs",
+      authDomain: "nexaverse-eeb07.firebaseapp.com",
+      projectId: "nexaverse-eeb07",
+      storageBucket: "nexaverse-eeb07.appspot.com",
+      messagingSenderId: "686342300627",
+      appId: "1:686342300627:web:90522d8f1129fb00b08526",
+    }; // Your config
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Get Firebase services
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // DOM Elements
+        const authBtn = document.getElementById('authBtn');
+        const userAvatar = document.getElementById('userAvatar');
+        const userDropdown = document.getElementById('userDropdown');
+        const signOutBtn = document.getElementById('signOutBtn');
+        const authModal = document.getElementById('authModal');
+        const closeModalBtn = document.getElementById('closeModal');
+        const signInTab = document.getElementById('signInTab');
+        const signUpTab = document.getElementById('signUpTab');
+        const signInForm = document.getElementById('signInForm');
+        const signUpForm = document.getElementById('signUpForm');
+        const signInEmailInput = document.getElementById('signInEmail');
+        const signInPasswordInput = document.getElementById('signInPassword');
+        const signUpEmailInput = document.getElementById('signUpEmail');
+        const signUpPasswordInput = document.getElementById('signUpPassword');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const githubSignInBtn = document.getElementById('githubSignIn');
+        const githubSignUpBtn = document.getElementById('githubSignUp');
+        const appManagementModal = document.getElementById('appManagementModal');
+        const closeAppManagementModalBtn = document.getElementById('closeAppManagementModal');
+        const openCreateAppModalBtn = document.getElementById('openCreateAppModalBtn');
+        const createAppModal = document.getElementById('createEditAppModal');
+        const closeCreateAppModalBtn = document.getElementById('closeCreateEditAppModal');
+        const appForm = document.getElementById('appForm');
+        const appIdInput = document.getElementById('appId');
+        const appNameInput = document.getElementById('appName');
+        const appDescriptionInput = document.getElementById('appDescription');
+        const appIconInput = document.getElementById('appIcon');
+        const saveAppBtn = document.getElementById('saveAppBtn');
+        const appModalTitle = document.getElementById('appModalTitle');
+        const appList = document.getElementById('appList');
+        const noAppsMessage = document.getElementById('noAppsMessage');
+        const confirmDeleteModal = document.getElementById('confirmDeleteModal');
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+        const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+        const appToDeleteName = document.getElementById('appToDeleteName');
+        const myAppsLink = document.getElementById('myAppsLink');
+        const profileLink = document.getElementById('profileLink');
+        const notificationBell = document.getElementById('notificationBell');
+        const notificationBadge = document.getElementById('notificationBadge');
+        const notificationPopup = document.getElementById('notificationPopup');
+        const notificationList = document.getElementById('notificationList');
+        const noNotificationsMessage = document.getElementById('noNotificationsMessage');
+
+        let editAppId = null; // To store the ID of the app being edited
+
+        // --- Auth Modals & Tabs ---
+        function showAuthModal() {
+            authModal.style.display = 'flex';
+            setTimeout(() => authModal.classList.add('show'), 10); // For transition
+        }
+
+        function hideAuthModal() {
+            authModal.classList.remove('show');
+            setTimeout(() => authModal.style.display = 'none', 400); // Wait for transition
+        }
+
+        function switchAuthTab(tabName) {
+            signInTab.classList.remove('active');
+            signUpTab.classList.remove('active');
+            signInForm.classList.remove('active');
+            signUpForm.classList.remove('active');
+
+            if (tabName === 'signIn') {
+                signInTab.classList.add('active');
+                signInForm.classList.add('active');
+            } else {
+                signUpTab.classList.add('active');
+                signUpForm.classList.add('active');
+            }
+        }
+
+        authBtn.addEventListener('click', () => {
+            showAuthModal();
+            switchAuthTab('signIn'); // Default to sign in
+        });
+
+        closeModalBtn.addEventListener('click', hideAuthModal);
+
+        signInTab.addEventListener('click', () => switchAuthTab('signIn'));
+        signUpTab.addEventListener('click', () => switchAuthTab('signUp'));
+
+        // Close modal on outside click
+        window.addEventListener('click', (event) => {
+            if (event.target === authModal) {
+                hideAuthModal();
+            }
+            if (event.target === appManagementModal) {
+                hideAppManagementModal();
+            }
+            if (event.target === createAppModal) {
+                hideCreateEditAppModal();
+            }
+            if (event.target === confirmDeleteModal) {
+                hideConfirmModal();
+            }
+        });
+
+        // --- Firebase Auth ---
+
+        // Email/Password Sign In
+        signInForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = signInEmailInput.value;
+            const password = signInPasswordInput.value;
+
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                hideAuthModal();
+                alert('Signed in successfully!');
+            } catch (error) {
+                alert('Sign In Error: ' + error.message);
+            }
+        });
+
+        // Email/Password Sign Up
+        signUpForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = signUpEmailInput.value;
+            const password = signUpPasswordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+
+            if (password !== confirmPassword) {
+                alert('Passwords do not match!');
+                return;
+            }
+
+            try {
+                await auth.createUserWithEmailAndPassword(email, password);
+                hideAuthModal();
+                alert('Signed up successfully!');
+            } catch (error) {
+                alert('Sign Up Error: ' + error.message);
+            }
+        });
+
+        // GitHub Auth Provider
+        const githubProvider = new firebase.auth.GithubAuthProvider();
+
+        githubSignInBtn.addEventListener('click', async () => {
+            try {
+                await auth.signInWithPopup(githubProvider);
+                hideAuthModal();
+                alert('Signed in with GitHub successfully!');
+            } catch (error) {
+                alert('GitHub Sign In Error: ' + error.message);
+            }
+        });
+
+        githubSignUpBtn.addEventListener('click', async () => {
+            try {
+                await auth.signInWithPopup(githubProvider); // GitHub sign-up is essentially sign-in with pop-up
+                hideAuthModal();
+                alert('Signed up with GitHub successfully!');
+            } catch (error) {
+                alert('GitHub Sign Up Error: ' + error.message);
+            }
+        });
+
+        // Auth State Listener
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                // User is signed in
+                authBtn.style.display = 'none';
+                userAvatar.style.display = 'block';
+                userAvatar.src = user.photoURL || 'https://via.placeholder.com/46'; // Use user photo or placeholder
+                loadApps();
+                listenForNotifications();
+            } else {
+                // User is signed out
+                authBtn.style.display = 'block';
+                userAvatar.style.display = 'none';
+                userDropdown.classList.remove('show');
+                appList.innerHTML = ''; // Clear app list
+                noAppsMessage.style.display = 'block'; // Show no apps message
+                notificationList.innerHTML = '';
+                notificationBadge.style.display = 'none';
+                noNotificationsMessage.style.display = 'block';
+            }
+        });
+
+        // Sign Out
+        signOutBtn.addEventListener('click', async () => {
+            try {
+                await auth.signOut();
+                alert('Signed out successfully!');
+                userDropdown.classList.remove('show'); // Hide dropdown on sign out
+            } catch (error) {
+                alert('Sign Out Error: ' + error.message);
+            }
+        });
+
+        // Toggle User Dropdown
+        userAvatar.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent document click from closing immediately
+            userDropdown.classList.toggle('show');
+        });
+
+        // Close dropdown when clicking outside
+        window.addEventListener('click', (event) => {
+            if (!userDropdown.contains(event.target) && event.target !== userAvatar) {
+                userDropdown.classList.remove('show');
+            }
+        });
+
+        // Prevent dropdown from closing when clicking inside it
+        userDropdown.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
+
+        // --- App Management Modals ---
+        function showAppManagementModal() {
+            appManagementModal.style.display = 'flex';
+            setTimeout(() => appManagementModal.classList.add('show'), 10);
+        }
+
+        function hideAppManagementModal() {
+            appManagementModal.classList.remove('show');
+            setTimeout(() => appManagementModal.style.display = 'none', 400);
+        }
+
+        myAppsLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showAppManagementModal();
+            loadApps();
+        });
+
+        closeAppManagementModalBtn.addEventListener('click', hideAppManagementModal);
+
+        function showCreateEditAppModal(app = null) {
+            createAppModal.style.display = 'flex';
+            setTimeout(() => createAppModal.classList.add('show'), 10);
+
+            if (app) {
+                appModalTitle.textContent = 'Edit App';
+                appIdInput.value = app.id;
+                appNameInput.value = app.name;
+                appDescriptionInput.value = app.description;
+                appIconInput.value = app.icon || '';
+                editAppId = app.id;
+            } else {
+                appModalTitle.textContent = 'Create New App';
+                appForm.reset(); // Clear form for new app
+                appIdInput.value = '';
+                editAppId = null;
+            }
+        }
+
+        function hideCreateEditAppModal() {
+            createAppModal.classList.remove('show');
+            setTimeout(() => createAppModal.style.display = 'none', 400);
+        }
+
+        openCreateAppModalBtn.addEventListener('click', () => {
+            showCreateEditAppModal();
+        });
+
+        closeCreateAppModalBtn.addEventListener('click', hideCreateEditAppModal);
+
+        // --- App Data (Firestore) ---
+
+        // Save (Create/Edit) App
+        appForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const user = auth.currentUser;
+            if (!user) {
+                alert('You must be logged in to create/edit apps.');
+                return;
+            }
+
+            const appData = {
+                name: appNameInput.value,
+                description: appDescriptionInput.value,
+                icon: appIconInput.value,
+                userId: user.uid, // Link app to user
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            try {
+                if (editAppId) {
+                    // Update existing app
+                    await db.collection('apps').doc(editAppId).update(appData);
+                    alert('App updated successfully!');
+                } else {
+                    // Create new app
+                    await db.collection('apps').add(appData);
+                    alert('App created successfully!');
+                }
+                hideCreateEditAppModal();
+                loadApps(); // Reload apps to show changes
+            } catch (error) {
+                alert('Error saving app: ' + error.message);
+            }
+        });
+
+        // Load Apps
+        async function loadApps() {
+            const user = auth.currentUser;
+            if (!user) {
+                appList.innerHTML = '';
+                noAppsMessage.style.display = 'block';
+                return;
+            }
+
+            try {
+                const querySnapshot = await db.collection('apps')
+                    .where('userId', '==', user.uid)
+                    .orderBy('createdAt', 'desc')
+                    .get();
+
+                appList.innerHTML = ''; // Clear previous apps
+                if (querySnapshot.empty) {
+                    noAppsMessage.style.display = 'block';
+                } else {
+                    noAppsMessage.style.display = 'none';
+                    querySnapshot.forEach(doc => {
+                        const app = { id: doc.id, ...doc.data() };
+                        const appCard = `
+                            <div class="app-card">
+                                <img src="${app.icon || 'https://via.placeholder.com/60'}" alt="${app.name}" class="app-icon">
+                                <div class="app-info">
+                                    <h3>${app.name}</h3>
+                                    <p>${app.description || 'No description provided.'}</p>
+                                </div>
+                                <div class="app-actions">
+                                    <button class="edit-app-btn" data-id="${app.id}"><i class="fas fa-edit"></i></button>
+                                    <button class="delete-app-btn" data-id="${app.id}" data-name="${app.name}"><i class="fas fa-trash-alt"></i></button>
+                                </div>
+                            </div>
+                        `;
+                        appList.innerHTML += appCard;
+                    });
+
+                    // Add event listeners to new buttons
+                    document.querySelectorAll('.edit-app-btn').forEach(button => {
+                        button.addEventListener('click', async (e) => {
+                            const appId = e.currentTarget.dataset.id;
+                            const appDoc = await db.collection('apps').doc(appId).get();
+                            if (appDoc.exists) {
+                                showCreateEditAppModal({ id: appDoc.id, ...appDoc.data() });
+                            }
+                        });
+                    });
+
+                    document.querySelectorAll('.delete-app-btn').forEach(button => {
+                        button.addEventListener('click', (e) => {
+                            const appId = e.currentTarget.dataset.id;
+                            const appName = e.currentTarget.dataset.name;
+                            showConfirmModal(appId, appName);
+                        });
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading apps:', error);
+                alert('Error loading apps: ' + error.message);
+            }
+        }
+
+        // --- Delete Confirmation Modal ---
+        let appIdToDelete = null;
+
+        function showConfirmModal(appId, appName) {
+            appIdToDelete = appId;
+            appToDeleteName.textContent = appName;
+            confirmDeleteModal.style.display = 'flex';
+            setTimeout(() => confirmDeleteModal.classList.add('show'), 10);
+        }
+
+        function hideConfirmModal() {
+            confirmDeleteModal.classList.remove('show');
+            setTimeout(() => confirmDeleteModal.style.display = 'none', 400);
+            appIdToDelete = null;
+        }
+
+        confirmDeleteBtn.addEventListener('click', async () => {
+            if (!appIdToDelete) return;
+
+            const user = auth.currentUser;
+            if (!user) {
+                alert('You must be logged in to delete apps.');
+                return;
+            }
+
+            try {
+                // Optional: Add a notification for app deletion
+                await db.collection('notifications').add({
+                    userId: user.uid,
+                    message: `Your app "${appToDeleteName.textContent}" was deleted.`,
+                    read: false,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                await db.collection('apps').doc(appIdToDelete).delete();
+                alert('App deleted successfully!');
+                hideConfirmModal();
+                loadApps();
+            } catch (error) {
+                alert('Error deleting app: ' + error.message);
+            }
+        });
+
+        cancelDeleteBtn.addEventListener('click', hideConfirmModal);
+
+
+        // --- Notifications ---
+        function showNotificationPopup() {
+            notificationPopup.classList.add('show');
+        }
+
+        function hideNotificationPopup() {
+            notificationPopup.classList.remove('show');
+        }
+
+        notificationBell.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent document click from closing immediately
+            notificationPopup.classList.toggle('show');
+            if (notificationPopup.classList.contains('show')) {
+                markAllNotificationsAsRead();
+            }
+        });
+
+        // Close notification popup when clicking outside
+        window.addEventListener('click', (event) => {
+            if (!notificationPopup.contains(event.target) && event.target !== notificationBell && !notificationBell.contains(event.target)) {
+                hideNotificationPopup();
+            }
+        });
+
+
+        async function listenForNotifications() {
+            const user = auth.currentUser;
+            if (!user) {
+                notificationList.innerHTML = '';
+                notificationBadge.style.display = 'none';
+                noNotificationsMessage.style.display = 'block';
+                return;
+            }
+
+            // Real-time listener for notifications
+            db.collection('notifications')
+                .where('userId', '==', user.uid)
+                .orderBy('createdAt', 'desc')
+                .onSnapshot(snapshot => {
+                    notificationList.innerHTML = ''; // Clear existing
+                    let unreadCount = 0;
+
+                    if (snapshot.empty) {
+                        noNotificationsMessage.style.display = 'block';
+                    } else {
+                        noNotificationsMessage.style.display = 'none';
+                        snapshot.forEach(doc => {
+                            const notification = { id: doc.id, ...doc.data() };
+                            const timestamp = notification.createdAt ? new Date(notification.createdAt.toDate()).toLocaleString() : 'Just now';
+                            const notificationItem = `
+                                <li class="notification-item ${notification.read ? '' : 'unread'}" data-id="${notification.id}">
+                                    ${notification.message}
+                                    <small>${timestamp}</small>
+                                </li>
+                            `;
+                            notificationList.innerHTML += notificationItem;
+
+                            if (!notification.read) {
+                                unreadCount++;
+                            }
+                        });
+                    }
+
+                    // Update badge
+                    if (unreadCount > 0) {
+                        notificationBadge.textContent = unreadCount;
+                        notificationBadge.style.display = 'block';
+                    } else {
+                        notificationBadge.style.display = 'none';
+                    }
+                }, error => {
+                    console.error("Error listening to notifications: ", error);
+                });
+        }
+
+        async function markAllNotificationsAsRead() {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            try {
+                const unreadNotifications = await db.collection('notifications')
+                    .where('userId', '==', user.uid)
+                    .where('read', '==', false)
+                    .get();
+
+                const batch = db.batch();
+                unreadNotifications.forEach(doc => {
+                    batch.update(doc.ref, { read: true });
+                });
+                await batch.commit();
+            } catch (error) {
+                console.error("Error marking notifications as read: ", error);
+            }
+        }
+
+        // --- Initial Load ---
+        // Ensure app data is loaded on page load if user is already signed in
+        window.addEventListener('load', () => {
+            if (auth.currentUser) {
+                loadApps();
+                listenForNotifications();
+            }
+        });
+
+        // Redirect to profile page (placeholder)
+        profileLink.addEventListener('click', () => {
+            alert('Profile page coming soon!');
+            userDropdown.classList.remove('show');
+        });
+
+
+        // Handle app creation confirmation outside app management modal
+        document.addEventListener('appCreated', (e) => {
+            const user = auth.currentUser;
+            if (user) {
+                db.collection('notifications').add({
+                    userId: user.uid,
+                    message: `Your app "${e.detail.appName}" has been successfully created!`,
+                    read: false,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+
+                        hideConfirmModal();
+                        loadApps();
+                    })
+                    .catch(error => {
+                        alert('Error deleting app: ' + error.message);
+                    });
+            });
+        });
+
+        // Cancel delete
+        document.getElementById('cancelDeleteBtn').addEventListener('click', hideConfirmModal);
+
+        // Create more particles for the reveal animation
+        function createParticles() {
+            const reveal = document.querySelector('.tech-reveal');
+            for (let i = 0; i < 8; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                particle.style.cssText = `
+                    --tx: ${Math.random() * 100 - 50}px;
+                    --ty: ${Math.random() * 60 - 30}px;
+                    width: ${Math.random() * 6 + 4}px;
+                    height: ${Math.random() * 6 + 4}px;
+                    top: ${Math.random() * 80 + 10}%;
+                    left: ${Math.random() * 80 + 10}%;
+                    animation-delay: ${Math.random() * 2}s;
+                `;
+                reveal.appendChild(particle);
+            }
+        }
+
+        // Initialize particles on load
+        window.addEventListener('load', createParticles);
+    </script>
+</body>
+</html>
