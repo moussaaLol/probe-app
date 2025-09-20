@@ -1,6 +1,6 @@
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const stripe = new Stripe('sk_test_51S9TzxQ08peRv6NQeq4yNuRMk54PTvO5iRGKUFVnzgNot2BJDdQ5D3IQ5oepS3tF50Drywkr2uWS1GjqKCOPkfkk00zKXBUWkV');
 
 export default async function handler(req, res) {
   // Only allow POST requests
