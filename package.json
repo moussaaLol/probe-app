@@ -2,10 +2,18 @@
   "name": "probe-app",
   "version": "1.0.0",
   "description": "Probe App - App Store",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'Building...'",
+    "start": "vercel start"
+  },
   "dependencies": {
     "stripe": "^12.0.0"
   },
   "devDependencies": {
     "vercel": "^28.0.0"
+  },
+  "engines": {
+    "node": ">=16.x"
   }
 }
