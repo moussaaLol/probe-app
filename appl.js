@@ -100,21 +100,37 @@ function loadAppDetails() {
     });
 }
 
+
 // Handle purchase flow
 function handlePurchase() {
+    console.log('Purchase button clicked');
     if (!auth.currentUser) {
         alert('Please sign in to purchase this app.');
         return;
     }
-    // In handlePurchase() function
-document.getElementById('purchaseAmount').textContent = `$${currentApp.price}`;
+    
+    // Check if Stripe is available
+    if (!stripe) {
+        alert('Payment system is currently unavailable. Please try again later.');
+        return;
+    }
+    
     // Show confirmation modal
-    userEmailDisplay.textContent = auth.currentUser.email;
-    showModal(confirmModalOverlay);
+    if (userEmailDisplay && purchaseAmount) {
+        userEmailDisplay.textContent = auth.currentUser.email;
+        purchaseAmount.textContent = `$${currentApp.price}`;
+        showModal(confirmModalOverlay);
+        console.log('Modal should be visible now');
+    } else {
+        console.error('Modal elements not found');
+        // Fallback: proceed directly to checkout
+        createStripeCheckout();
+    }
 }
 
 // Handle purchase confirmation
 function confirmPurchase() {
+    console.log('Purchase confirmed');
     hideModal(confirmModalOverlay);
     createStripeCheckout();
 }
@@ -137,6 +153,10 @@ async function createStripeCheckout() {
             }),
         });
 
+        if (!response.ok) {
+            throw new Error('Server error: ' + response.status);
+        }
+
         const session = await response.json();
 
         // Redirect to Stripe Checkout
@@ -153,52 +173,29 @@ async function createStripeCheckout() {
     }
 }
 
-// Verify payment and assign premium role
-async function verifyPaymentAndAssignRole() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const sessionId = urlParams.get('session_id');
-    
-    if (sessionId) {
-        try {
-            const response = await fetch('/.netlify/functions/verify-payment', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ sessionId }),
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                // Assign premium role to user
-                await db.collection('users').doc(auth.currentUser.uid).set({
-                    premium: true,
-                    premiumSince: new Date(),
-                    purchasedApps: firebase.firestore.FieldValue.arrayUnion(currentApp.id)
-                }, { merge: true });
-
-                // Show success message
-                alert('Payment successful! Premium features have been activated.');
-            } else {
-                alert('Payment verification failed. Please contact support.');
-            }
-        } catch (error) {
-            console.error('Error verifying payment:', error);
-            alert('Error verifying payment. Please contact support.');
-        }
+// Modal functions
+function showModal(modal) {
+    if (modal) {
+        console.log('Showing modal');
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        // Force reflow to ensure the display change is processed
+        setTimeout(() => {
+            modal.classList.add('show');
+        }, 10);
+    } else {
+        console.error('Modal element not provided to showModal');
     }
 }
 
-// Modal functions
-function showModal(modal) {
-    modal.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-}
-
 function hideModal(modal) {
-    modal.style.display = 'none';
-    document.body.style.overflow = 'auto';
+    if (modal) {
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }, 300);
+    }
 }
 
 // Update rating display
