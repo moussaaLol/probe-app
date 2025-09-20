@@ -136,41 +136,96 @@ function confirmPurchase() {
 }
 
 // Create Stripe checkout session
+// Create Stripe checkout session
 async function createStripeCheckout() {
-    try {
-        // Create checkout session on your server
-        const response = await fetch('/.netlify/functions/create-checkout', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                appId: currentApp.id,
-                appName: currentApp.title,
-                price: currentApp.price * 100, // Convert to cents
-                userId: auth.currentUser.uid,
-                userEmail: auth.currentUser.email,
-            }),
-        });
+  try {
+    // Show loading state
+    downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    downloadBtn.disabled = true;
+    
+    // Create checkout session using Vercel API route
+    const response = await fetch('/api/create-checkout', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        appId: currentApp.id,
+        appName: currentApp.title,
+        price: currentApp.price * 100, // Convert to cents
+        userId: auth.currentUser.uid,
+        userEmail: auth.currentUser.email,
+      }),
+    });
 
-        if (!response.ok) {
-            throw new Error('Server error: ' + response.status);
-        }
-
-        const session = await response.json();
-
-        // Redirect to Stripe Checkout
-        const result = await stripe.redirectToCheckout({
-            sessionId: session.id,
-        });
-
-        if (result.error) {
-            alert(result.error.message);
-        }
-    } catch (error) {
-        console.error('Error creating checkout session:', error);
-        alert('Failed to initiate payment. Please try again.');
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Server error: ' + response.status);
     }
+
+    const session = await response.json();
+
+    // Redirect to Stripe Checkout
+    const result = await stripe.redirectToCheckout({
+      sessionId: session.id,
+    });
+
+    if (result.error) {
+      alert(result.error.message);
+    }
+  } catch (error) {
+    console.error('Error creating checkout session:', error);
+    alert(error.message || 'Failed to initiate payment. Please try again.');
+  } finally {
+    // Reset button state
+    if (currentApp.isPaid) {
+      downloadBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> Buy Now';
+    } else {
+      downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download';
+    }
+    downloadBtn.disabled = false;
+  }
+}
+
+// Verify payment and assign premium role
+async function verifyPaymentAndAssignRole() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const sessionId = urlParams.get('session_id');
+  
+  if (sessionId) {
+    try {
+      const response = await fetch('/api/verify-payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ sessionId }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Server error: ' + response.status);
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Assign premium role to user
+        await db.collection('users').doc(auth.currentUser.uid).set({
+          premium: true,
+          premiumSince: new Date(),
+          purchasedApps: firebase.firestore.FieldValue.arrayUnion(currentApp.id)
+        }, { merge: true });
+
+        // Show success message
+        alert('Payment successful! Premium features have been activated.');
+      } else {
+        alert('Payment verification failed. Please contact support.');
+      }
+    } catch (error) {
+      console.error('Error verifying payment:', error);
+      alert('Error verifying payment. Please contact support.');
+    }
+  }
 }
 
 // Modal functions
