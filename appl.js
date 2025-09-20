@@ -17,6 +17,7 @@ const db = firebase.firestore();
 const stripe = Stripe('pk_test_51S9TzxQ08peRv6NQE5mL8DCVbxc2k4fs7MI3n0jEBO9n3vwqFEFBYLuw7PJFaM93tldlrdoM5j1JHbCi5DliIFCS00mIdukMoc'); // Replace with your Stripe publishable key
 
 // DOM Elements
+
 const authButton = document.getElementById('authButton');
 const userAvatar = document.getElementById('userAvatar');
 const userDropdown = document.getElementById('userDropdown');
@@ -105,7 +106,8 @@ function handlePurchase() {
         alert('Please sign in to purchase this app.');
         return;
     }
-    
+    // In handlePurchase() function
+document.getElementById('purchaseAmount').textContent = `$${currentApp.price}`;
     // Show confirmation modal
     userEmailDisplay.textContent = auth.currentUser.email;
     showModal(confirmModalOverlay);
