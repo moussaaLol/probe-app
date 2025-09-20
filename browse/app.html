@@ -7,12 +7,11 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-     <!-- Other head elements -->
     <script src="https://js.stripe.com/v3/"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Orbitron:wght@500;600;700&display=swap" rel="stylesheet">
-       <link rel="stylesheet" href="/app.css">
-</head>
+    <link rel="stylesheet" href="/app.css">
+    </head>
 <body>
     <nav>
         <a href="/" class="logo">
@@ -54,6 +53,28 @@
             </div>
         </div>
     </nav>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmModalOverlay" class="modal-overlay">
+        <div class="modal-content">
+            <div class="success-icon">⚠️</div>
+            <h3 class="modal-title">Confirm Purchase</h3>
+            <p class="modal-message">
+                Is this your account?<br>
+                <span id="userEmailDisplay" class="modal-email"></span>
+                <br><br>
+                You will be charged <span id="purchaseAmount" class="modal-email"></span> for this purchase.
+            </p>
+            <div class="modal-buttons">
+                <button id="confirmYesBtn" class="modal-close-btn btn-success">
+                    <i class="fas fa-check"></i> Yes, Proceed
+                </button>
+                <button id="confirmNoBtn" class="modal-close-btn btn-danger">
+                    <i class="fas fa-times"></i> No, Cancel
+                </button>
+            </div>
+        </div>
+    </div>
 
     <div class="app-details-container">
         <div class="app-header">
@@ -106,7 +127,6 @@
         </div>
     </div>
 
-
-  <script src="/appl.js"></script>
+    <script src="/appl.js"></script>
 </body>
 </html>
