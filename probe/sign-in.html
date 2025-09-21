@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>probe-app | Authentication</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Orbitron:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Base Styles */
+        :root {
+            --primary-color: #6A1B9A;
+            --secondary-color: #D81B60;
+            --dark-text: #212121;
+            --light-bg: #F3E5F5;
+            --white: #FFFFFF;
+            --black: #000000;
+            --gray-light: #EEEEEE;
+            --gray-medium: #757575;
+            --gradient-bg: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            --card-shadow: 0 10px 30px rgba(106, 27, 154, 0.15);
+            --hover-shadow: 0 15px 35px rgba(106, 27, 154, 0.25);
+            --smooth-transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            color: var(--dark-text);
+            font-family: 'Montserrat', sans-serif;
+            overflow-x: hidden;
+            background-color: var(--white);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 5%;
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            position: relative;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+            letter-spacing: 1.5px;
+            position: relative;
+            transition: var(--smooth-transition);
+        }
+
+        .logo:hover {
+            transform: translateY(-2px);
+            text-shadow: 0 5px 15px rgba(106, 27, 154, 0.3);
+        }
+
+        .logo::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background: var(--gradient-bg);
+            transition: width 0.4s ease;
+            border-radius: 2px;
+        }
+
+        .logo:hover::after {
+            width: 100%;
+        }
+
+        .nav-logo-icon {
+            height: 40px;
+            width: auto;
+            margin-right: 12px;
+            filter: drop-shadow(0 3px 5px rgba(106, 27, 154, 0.2));
+            transition: var(--smooth-transition);
+        }
+
+        .logo:hover .nav-logo-icon {
+            transform: rotate(10deg) scale(1.1);
+        }
+
+        /* Auth Section */
+        .auth-section {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .auth-btn {
+            background: var(--gradient-bg);
+            color: white;
+            border: none;
+            padding: 12px 26px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--smooth-transition);
+            font-family: 'Montserrat', sans-serif;
+            letter-spacing: 0.5px;
+            box-shadow: 0 6px 15px rgba(106, 27, 154, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.7s ease;
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(106, 27, 154, 0.4);
+        }
+
+        .auth-btn:hover::before {
+            left: 100%;
+        }
+
+        /* Main Content */
+        .auth-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 5%;
+            background: var(--light-bg);
+        }
+
+        .auth-card {
+            background-color: var(--white);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            width: 100%;
+            max-width: 450px;
+            border: 1px solid rgba(106, 27, 154, 0.1);
+            transition: var(--smooth-transition);
+        }
+
+        .auth-card:hover {
+            box-shadow: var(--hover-shadow);
+            transform: translateY(-5px);
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .auth-logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            display: block;
+        }
+
+        .auth-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .auth-subtitle {
+            color: var(--gray-medium);
+            font-size: 1rem;
+        }
+
+        /* Auth Tabs */
+        .auth-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--gray-light);
+            margin-bottom: 25px;
+            background: var(--light-bg);
+            border-radius: 8px 8px 0 0;
+            overflow: hidden;
+        }
+
+        .auth-tab {
+            flex: 1;
+            text-align: center;
+            padding: 16px 0;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--dark-text);
+            font-family: 'Montserrat', sans-serif;
+            letter-spacing: 0.5px;
+            position: relative;
+            transition: var(--smooth-transition);
+            opacity: 0.7;
+        }
+
+        .auth-tab.active {
+            opacity: 1;
+            color: var(--primary-color);
+        }
+
+        .auth-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--gradient-bg);
+            border-radius: 3px 3px 0 0;
+        }
+
+        /* Auth Forms */
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+            animation: formFadeIn 0.4s ease;
+        }
+
+        @keyframes formFadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark-text);
+            font-size: 0.95rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid var(--gray-light);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: var(--smooth-transition);
+            background-color: var(--light-bg);
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .form-group input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(106, 27, 154, 0.15);
+            background-color: var(--white);
+        }
+
+        .submit-btn {
+            background: var(--gradient-bg);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            font-size: 1rem;
+            transition: var(--smooth-transition);
+            font-family: 'Montserrat', sans-serif;
+            letter-spacing: 0.5px;
+            margin-top: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.7s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(106, 27, 154, 0.3);
+        }
+
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+
+        .github-auth {
+            background-color: var(--black);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            transition: var(--smooth-transition);
+        }
+
+        .github-auth i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .github-auth:hover {
+            background-color: #222;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .auth-divider {
+            text-align: center;
+            margin: 25px 0;
+            position: relative;
+        }
+
+        .auth-divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--gray-light);
+            z-index: 1;
+        }
+
+        .auth-divider span {
+            background: var(--white);
+            padding: 0 15px;
+            position: relative;
+            z-index: 2;
+            color: var(--gray-medium);
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--dark-text);
+            color: var(--white);
+            padding: 40px 5% 20px;
+            text-align: center;
+            margin-top: auto;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+            letter-spacing: 1.5px;
+        }
+
+        .footer-logo-img {
+            height: 40px;
+            margin-right: 10px;
+            filter: drop-shadow(0 3px 5px rgba(106, 27, 154, 0.3));
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        .footer-link {
+            color: var(--white);
+            margin: 0 15px 15px;
+            text-decoration: none;
+            transition: var(--smooth-transition);
+            opacity: 0.8;
+            font-size: 0.95rem;
+        }
+
+        .footer-link:hover {
+            opacity: 1;
+            color: var(--primary-color);
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .social-link {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 10px;
+            transition: var(--smooth-transition);
+            color: var(--white);
+            font-size: 1.2rem;
+        }
+
+        .social-link:hover {
+            background: var(--gradient-bg);
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(106, 27, 154, 0.3);
+        }
+
+        .copyright {
+            font-size: 0.9rem;
+            opacity: 0.6;
+            margin-top: 20px;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .auth-card {
+                padding: 30px 25px;
+            }
+            
+            .auth-title {
+                font-size: 1.7rem;
+            }
+            
+            .auth-tab {
+                padding: 14px 0;
+                font-size: 0.95rem;
+            }
+            
+            .auth-section {
+                position: relative;
+                top: 0;
+                right: 0;
+                margin-top: 15px;
+            }
+            
+            nav {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .auth-card {
+                padding: 25px 20px;
+            }
+            
+            .auth-title {
+                font-size: 1.5rem;
+            }
+            
+            .footer-links {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .social-links {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+        }
+
+        /* Error Message */
+        .error-message {
+            background-color: rgba(216, 27, 96, 0.1);
+            color: var(--secondary-color);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .success-message {
+            background-color: rgba(76, 175, 80, 0.1);
+            color: #4CAF50;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/" class="logo">
+            <img src="https://i.ibb.co/Kxyq4qGh/Gemini-Generated-Image-uyuw4zuyuw4zuyuw-modified.png" alt="Probe App Logo" class="nav-logo-icon">
+            <span>probe-app</span>
+        </a>
+        
+        <div class="auth-section">
+            <button id="authButton" class="auth-btn">Sign In</button>
+        </div>
+    </nav>
+
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <img src="https://i.ibb.co/Kxyq4qGh/Gemini-Generated-Image-uyuw4zuyuw4zuyuw-modified.png" alt="Probe App Logo" class="auth-logo">
+                <h1 class="auth-title">Welcome to probe-app</h1>
+                <p class="auth-subtitle">Sign in or create an account to continue</p>
+            </div>
+
+            <div class="error-message" id="errorMessage"></div>
+            <div class="success-message" id="successMessage"></div>
+
+            <div class="auth-tabs">
+                <div class="auth-tab active" data-tab="signin">Sign In</div>
+                <div class="auth-tab" data-tab="signup">Sign Up</div>
+            </div>
+
+            <!-- Sign In Form -->
+            <form id="signInForm" class="auth-form active">
+                <div class="form-group">
+                    <label for="signin-email">Email</label>
+                    <input type="email" id="signin-email" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="signin-password">Password</label>
+                    <input type="password" id="signin-password" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="submit-btn">Sign In</button>
+
+                <div class="auth-divider">
+                    <span>Or continue with</span>
+                </div>
+
+                <button type="button" class="github-auth" id="githubSignIn">
+                    <i class="fab fa-github"></i> Sign in with GitHub
+                </button>
+            </form>
+
+            <!-- Sign Up Form -->
+            <form id="signUpForm" class="auth-form">
+                <div class="form-group">
+                    <label for="signup-username">Username</label>
+                    <input type="text" id="signup-username" placeholder="Choose a username" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-email">Email</label>
+                    <input type="email" id="signup-email" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-password">Password</label>
+                    <input type="password" id="signup-password" placeholder="Create a password (min. 6 characters)" required>
+                </div>
+                <button type="submit" class="submit-btn">Create Account</button>
+
+                <div class="auth-divider">
+                    <span>Or continue with</span>
+                </div>
+
+                <button type="button" class="github-auth" id="githubSignUp">
+                    <i class="fab fa-github"></i> Sign up with GitHub
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">
+                <img src="https://i.ibb.co/Kxyq4qGh/Gemini-Generated-Image-uyuw4zuyuw4zuyuw-modified.png" alt="Probe App Logo" class="footer-logo-img">
+                probe-app
+            </div>
+            
+            <div class="footer-links">
+                <a href="/about" class="footer-link">About</a>
+                <a href="/privacy" class="footer-link">Privacy Policy</a>
+                <a href="/terms" class="footer-link">Terms of Service</a>
+                <a href="/contact" class="footer-link">Contact</a>
+                <a href="/support" class="footer-link">Support</a>
+            </div>
+            
+            <div class="social-links">
+                <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-discord"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+            </div>
+            
+            <div class="copyright">
+                &copy; 2025 probe-app. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+      // Firebase Configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyBMUi291fwb-HSxlGPQMxdEJGUTiOOvFBs",
+    authDomain: "nexaverse-eeb07.firebaseapp.com",
+    projectId: "nexaverse-eeb07",
+    storageBucket: "nexaverse-eeb07.appspot.com",
+    messagingSenderId: "686342300627",
+    appId: "1:686342300627:web:90522d8f1129fb00b08526",
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// DOM Elements
+const authTabs = document.querySelectorAll('.auth-tab');
+const signInForm = document.getElementById('signInForm');
+const signUpForm = document.getElementById('signUpForm');
+const githubSignIn = document.getElementById('githubSignIn');
+const githubSignUp = document.getElementById('githubSignUp');
+const errorMessage = document.getElementById('errorMessage');
+const successMessage = document.getElementById('successMessage');
+
+// GitHub Auth Provider
+const githubProvider = new firebase.auth.GithubAuthProvider();
+githubProvider.addScope('user:email');
+
+// Tab switching - FIX
+authTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+        const tabName = tab.dataset.tab;
+
+        // Reset tab active state
+        authTabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+
+        // Toggle forms instead of clearing them
+        if (tabName === "signin") {
+            signInForm.classList.add("active");
+            signUpForm.classList.remove("active");
+        } else {
+            signUpForm.classList.add("active");
+            signInForm.classList.remove("active");
+        }
+
+        hideMessages();
+    });
+});
+
+// Show error message
+function showError(message) {
+    errorMessage.textContent = message;
+    errorMessage.style.display = 'block';
+    successMessage.style.display = 'none';
+}
+
+// Show success message
+function showSuccess(message) {
+    successMessage.textContent = message;
+    successMessage.style.display = 'block';
+    errorMessage.style.display = 'none';
+}
+
+// Hide all messages
+function hideMessages() {
+    errorMessage.style.display = 'none';
+    successMessage.style.display = 'none';
+}
+
+// Email/password sign in
+signInForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    hideMessages();
+
+    const email = document.getElementById('signin-email').value;
+    const password = document.getElementById('signin-password').value;
+
+    if (!email || !password) {
+        showError('Please fill in all fields');
+        return;
+    }
+
+    auth.signInWithEmailAndPassword(email, password)
+        .then(() => {
+            showSuccess('Successfully signed in! Redirecting...');
+            setTimeout(() => window.location.href = '/', 1500);
+        })
+        .catch(error => showError(getErrorMessage(error)));
+});
+
+// Email/password sign up
+signUpForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    hideMessages();
+
+    const username = document.getElementById('signup-username').value;
+    const email = document.getElementById('signup-email').value;
+    const password = document.getElementById('signup-password').value;
+
+    if (!username || !email || !password) {
+        showError('Please fill in all fields');
+        return;
+    }
+
+    if (password.length < 6) {
+        showError('Password should be at least 6 characters');
+        return;
+    }
+
+    auth.createUserWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+            return userCredential.user.updateProfile({ displayName: username })
+                .then(() => {
+                    return db.collection('users').doc(userCredential.user.uid).set({
+                        username,
+                        email,
+                        avatarUrl: `https://ui-avatars.com/api/?name=${username}&background=6A1B9A&color=FFFFFF&bold=true`,
+                        role: 'user',
+                        subscribers: 0,
+                        following: 0,
+                        likes: 0,
+                        reputation: 0,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                });
+        })
+        .then(() => {
+            showSuccess('Account created successfully! Redirecting...');
+            setTimeout(() => window.location.href = '/', 1500);
+        })
+        .catch(error => showError(getErrorMessage(error)));
+});
+
+// GitHub sign in/up
+function signInWithGitHub() {
+    hideMessages();
+
+    auth.signInWithPopup(githubProvider)
+        .then((result) => {
+            const user = result.user;
+            return db.collection('users').doc(user.uid).get().then(doc => {
+                if (!doc.exists) {
+                    const username = user.displayName || user.email.split('@')[0];
+                    return db.collection('users').doc(user.uid).set({
+                        username,
+                        email: user.email,
+                        avatarUrl: user.photoURL || `https://ui-avatars.com/api/?name=${username}&background=6A1B9A&color=FFFFFF&bold=true`,
+                        role: 'user',
+                        subscribers: 0,
+                        following: 0,
+                        likes: 0,
+                        reputation: 0,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+            });
+        })
+        .then(() => {
+            showSuccess('Signed in with GitHub! Redirecting...');
+            setTimeout(() => window.location.href = '/', 1500);
+        })
+        .catch(error => showError(getErrorMessage(error)));
+}
+
+githubSignIn.addEventListener('click', signInWithGitHub);
+githubSignUp.addEventListener('click', signInWithGitHub);
+
+// Error handling helper
+function getErrorMessage(error) {
+    switch (error.code) {
+        case 'auth/user-not-found':
+            return 'No account found with this email.';
+        case 'auth/wrong-password':
+            return 'Incorrect password.';
+        case 'auth/email-already-in-use':
+            return 'Email already in use.';
+        case 'auth/invalid-email':
+            return 'Invalid email address.';
+        default:
+            return 'Something went wrong. Please try again.';
+    }
+}
+
+    </script>
+</body>
+</html>
