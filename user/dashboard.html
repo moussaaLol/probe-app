@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard - Probe App</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Orbitron:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Base Styles */
+        :root {
+            --primary-color: #6A1B9A;
+            --secondary-color: #D81B60;
+            --dark-text: #212121;
+            --light-bg: #F3E5F5;
+            --white: #FFFFFF;
+            --black: #000000;
+            --gray-light: #EEEEEE;
+            --gray-medium: #757575;
+            --success-color: #4CAF50;
+            --error-color: #f44336;
+            --warning-color: #ff9800;
+            --premium-color: #FFD700;
+            --gradient-bg: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            --premium-gradient: linear-gradient(135deg, #FFD700, #FFA000);
+            --card-shadow: 0 10px 30px rgba(106, 27, 154, 0.15);
+            --hover-shadow: 0 15px 35px rgba(106, 27, 154, 0.25);
+            --smooth-transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            color: var(--dark-text);
+            font-family: 'Montserrat', sans-serif;
+            overflow-x: hidden;
+            background-color: var(--white);
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 5%;
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            position: relative;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+            letter-spacing: 1.5px;
+            position: relative;
+            transition: var(--smooth-transition);
+        }
+
+        .logo:hover {
+            transform: translateY(-2px);
+            text-shadow: 0 5px 15px rgba(106, 27, 154, 0.3);
+        }
+
+        .logo::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background: var(--gradient-bg);
+            transition: width 0.4s ease;
+            border-radius: 2px;
+        }
+
+        .logo:hover::after {
+            width: 100%;
+        }
+
+        .nav-logo-icon {
+            height: 40px;
+            width: auto;
+            margin-right: 12px;
+            filter: drop-shadow(0 3px 5px rgba(106, 27, 154, 0.2));
+            transition: var(--smooth-transition);
+        }
+
+        .logo:hover .nav-logo-icon {
+            transform: rotate(10deg) scale(1.1);
+        }
+
+        .auth-section {
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .auth-btn {
+            background: var(--gradient-bg);
+            color: white;
+            border: none;
+            padding: 12px 26px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--smooth-transition);
+            font-family: 'Montserrat', sans-serif;
+            letter-spacing: 0.5px;
+            box-shadow: 0 6px 15px rgba(106, 27, 154, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.7s ease;
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(106, 27, 154, 0.4);
+        }
+
+        .auth-btn:hover::before {
+            left: 100%;
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            cursor: pointer;
+            object-fit: cover;
+            border: 2px solid var(--primary-color);
+            transition: var(--smooth-transition);
+            box-shadow: 0 6px 15px rgba(106, 27, 154, 0.2);
+            margin-left: 20px;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.1);
+            border-color: var(--secondary-color);
+            box-shadow: 0 8px 20px rgba(106, 27, 154, 0.3);
+        }
+
+        /* User Dropdown */
+        .user-dropdown {
+            display: none;
+            position: absolute;
+            top: 80px;
+            right: 5%;
+            background-color: var(--white);
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            width: 260px;
+            z-index: 100;
+            overflow: hidden;
+            transform: translateY(10px) scale(0.95);
+            opacity: 0;
+            transition: var(--smooth-transition);
+        }
+
+        .user-dropdown.show {
+            display: block;
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+
+        .dropdown-item {
+            padding: 16px 24px;
+            cursor: pointer;
+            transition: var(--smooth-transition);
+            color: var(--dark-text);
+            display: flex;
+            align-items: center;
+            font-size: 0.95rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dropdown-item i {
+            margin-right: 12px;
+            width: 20px;
+            text-align: center;
+            color: var(--primary-color);
+            transition: var(--smooth-transition);
+        }
+
+        .dropdown-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 5px;
+            height: 100%;
+            background: var(--gradient-bg);
+            transition: left 0.3s ease;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--light-bg);
+            color: var(--primary-color);
+            padding-left: 30px;
+        }
+
+        .dropdown-item:hover::before {
+            left: 0;
+        }
+
+        .dropdown-item:hover i {
+            transform: scale(1.2);
+            color: var(--secondary-color);
+        }
+
+        /* Dashboard Container */
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 5%;
+        }
+
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .dashboard-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .dashboard-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: var(--gradient-bg);
+            border-radius: 2px;
+        }
+
+        .dashboard-subtitle {
+            color: var(--gray-medium);
+            font-size: 1.1rem;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        /* User Info Card */
+        .user-info-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: var(--card-shadow);
+            border-left: 4px solid var(--primary-color);
+            transition: var(--smooth-transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .user-info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .user-info-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .user-avatar-large {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--primary-color);
+            margin-right: 20px;
+        }
+
+        .user-details h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .user-details p {
+            color: var(--gray-medium);
+        }
+
+        .user-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: var(--light-bg);
+            border-radius: 8px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--gray-medium);
+        }
+
+        /* API Key Card */
+        .api-key-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: var(--card-shadow);
+            border-left: 4px solid var(--secondary-color);
+            transition: var(--smooth-transition);
+        }
+
+        .api-key-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--smooth-transition);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .btn-premium {
+            background: var(--premium-gradient);
+            color: #000;
+            font-weight: 700;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .api-key-display {
+            background: var(--light-bg);
+            border: 1px solid var(--gray-light);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            position: relative;
+        }
+
+        .api-key-value {
+            letter-spacing: 1px;
+        }
+
+        .api-key-masked {
+            filter: blur(5px);
+            user-select: none;
+        }
+
+        .api-key-info {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+
+        .api-key-info h4 {
+            color: #1976d2;
+            margin-bottom: 5px;
+        }
+
+        .api-key-info p {
+            font-size: 0.9rem;
+            color: #424242;
+        }
+
+        /* API Usage Card */
+        .api-usage-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: var(--card-shadow);
+            border-left: 4px solid var(--success-color);
+            transition: var(--smooth-transition);
+        }
+
+        .api-usage-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .usage-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .usage-item {
+            text-align: center;
+            padding: 15px;
+            background: var(--light-bg);
+            border-radius: 8px;
+        }
+
+        .usage-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .usage-label {
+            font-size: 0.9rem;
+            color: var(--gray-medium);
+        }
+
+        /* Usage Progress Bar */
+        .usage-progress {
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            height: 10px;
+            background-color: var(--light-bg);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-bg);
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--gray-medium);
+        }
+
+        /* Premium Badge */
+        .premium-badge {
+            display: inline-block;
+            background: var(--premium-gradient);
+            color: #000;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-left: 10px;
+            box-shadow: 0 2px 5px rgba(255, 215, 0, 0.3);
+        }
+
+        .free-badge {
+            display: inline-block;
+            background: var(--light-bg);
+            color: var(--gray-medium);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .action-card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+            transition: var(--smooth-transition);
+            cursor: pointer;
+        }
+
+        .action-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .action-icon {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .action-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .action-desc {
+            font-size: 0.9rem;
+            color: var(--gray-medium);
+        }
+
+        /* Login Prompt */
+        .login-prompt {
+            text-align: center;
+            padding: 60px 20px;
+            background: var(--light-bg);
+            border-radius: 16px;
+            margin: 40px 0;
+        }
+
+        .login-prompt h2 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .login-prompt p {
+            color: var(--gray-medium);
+            margin-bottom: 25px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .user-info-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .user-avatar-large {
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+            
+            .user-stats, .usage-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Loading Spinner */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            color: white;
+            z-index: 1000;
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+            max-width: 300px;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            background: var(--success-color);
+        }
+
+        .toast.error {
+            background: var(--error-color);
+        }
+
+        .toast.warning {
+            background: var(--warning-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <a href="/" class="logo">
+            <img src="https://i.ibb.co/Kxyq4qGh/Gemini-Generated-Image-uyuw4zuyuw4zuyuw-modified.png" alt="Probe App Logo" class="nav-logo-icon">
+            <span>probe-app</span>
+        </a>
+        
+        <div class="auth-section">
+            <button id="authButton" class="auth-btn">Sign In</button>
+            <img id="userAvatar" class="user-avatar" src="" alt="User Avatar" style="display: none;">
+        </div>
+
+        <div id="userDropdown" class="user-dropdown">
+            <div class="dropdown-item" onclick="window.location.href='/dashboard'">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </div>
+            <div class="dropdown-item" onclick="window.location.href='/profile'">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </div>
+            <div class="dropdown-item" onclick="window.location.href='/api-docs'">
+                <i class="fas fa-code"></i>
+                <span>API Docs</span>
+            </div>
+            <div class="dropdown-divider"></div>
+            <div id="signOutBtn" class="dropdown-item">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Sign Out</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Content -->
+    <div class="dashboard-container">
+        <!-- Login Prompt (shown when user is not logged in) -->
+        <div id="loginPrompt" class="login-prompt" style="display: none;">
+            <h2>Access Your Dashboard</h2>
+            <p>Sign in to view your API keys, manage your account, and access developer tools.</p>
+            <button class="auth-btn" onclick="showAuthModal()">Sign In to Continue</button>
+        </div>
+
+        <!-- Dashboard (shown when user is logged in) -->
+        <div id="dashboardContent" style="display: none;">
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">Developer Dashboard</h1>
+                <p class="dashboard-subtitle">Manage your API keys and monitor your usage</p>
+            </div>
+
+            <div class="dashboard-grid">
+                <!-- User Info Card -->
+                <div class="user-info-card">
+                    <div class="user-info-header">
+                        <img id="userAvatarLarge" class="user-avatar-large" src="" alt="User Avatar">
+                        <div class="user-details">
+                            <h3 id="userName">Loading...</h3>
+                            <p id="userEmail">user@example.com</p>
+                            <span id="userStatus" class="free-badge">Free Tier</span>
+                            <span id="premiumBadge" class="premium-badge" style="display: none;">Premium</span>
+                        </div>
+                    </div>
+                    <div class="user-stats">
+                        <div class="stat-item">
+                            <div class="stat-value" id="apiCalls">0</div>
+                            <div class="stat-label">Total API Calls</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="appsCreated">0</div>
+                            <div class="stat-label">Apps Created</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- API Key Card -->
+                <div class="api-key-card">
+                    <div class="card-header">
+                        <h3 class="card-title">API Key</h3>
+                        <div class="card-actions">
+                            <button class="btn btn-primary" onclick="toggleApiKeyVisibility()">
+                                <i class="fas fa-eye"></i> <span id="toggleText">Show</span>
+                            </button>
+                            <button class="btn btn-warning" onclick="regenerateApiKey()">
+                                <i class="fas fa-sync-alt"></i> Regenerate
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="api-key-display">
+                        <div id="apiKeyValue" class="api-key-value api-key-masked">PB-xxxxxxxxxxxxxxxx</div>
+                    </div>
+                    
+                    <div class="api-key-info">
+                        <h4>API Key Security</h4>
+                        <p>Your API key provides full access to your account. Keep it secure and never share it in publicly accessible areas.</p>
+                    </div>
+                    
+                    <div class="card-actions">
+                        <button class="btn btn-secondary" onclick="copyApiKey()">
+                            <i class="fas fa-copy"></i> Copy to Clipboard
+                        </button>
+                    </div>
+                </div>
+
+                <!-- API Usage Card -->
+                <div class="api-usage-card">
+                    <div class="card-header">
+                        <h3 class="card-title">API Usage</h3>
+                        <button id="upgradeBtn" class="btn btn-premium" onclick="window.location.href='/billing'" style="display: none;">
+                            <i class="fas fa-crown"></i> Upgrade to Premium
+                        </button>
+                    </div>
+                    
+                    <div class="usage-stats">
+                        <div class="usage-item">
+                            <div class="usage-value" id="usageToday">0</div>
+                            <div class="usage-label">Today</div>
+                        </div>
+                        <div class="usage-item">
+                            <div class="usage-value" id="dailyLimit">10,000</div>
+                            <div class="usage-label">Daily Limit</div>
+                        </div>
+                    </div>
+                    
+                    <div class="usage-progress">
+                        <div class="progress-bar">
+                            <div id="usageProgress" class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-labels">
+                            <span id="usageRemaining">10,000 calls remaining</span>
+                            <span id="usagePercentage">0%</span>
+                        </div>
+                    </div>
+                    
+                    <p id="usageMessage">Usage resets at midnight UTC. Upgrade to increase your limits.</p>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <h3 style="margin: 30px 0 15px; font-family: 'Orbitron', sans-serif; color: var(--primary-color);">Quick Actions</h3>
+            <div class="quick-actions">
+                <div class="action-card" onclick="window.location.href='/api-docs'">
+                    <div class="action-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div class="action-title">API Documentation</div>
+                    <div class="action-desc">Learn how to use our APIs</div>
+                </div>
+                <div class="action-card" onclick="window.location.href='/app-submission'">
+                    <div class="action-icon">
+                        <i class="fas fa-upload"></i>
+                    </div>
+                    <div class="action-title">Submit App</div>
+                    <div class="action-desc">Submit your app to the store</div>
+                </div>
+                <div class="action-card" onclick="window.location.href='/billing'">
+                    <div class="action-icon">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <div class="action-title">Billing</div>
+                    <div class="action-desc">Manage your subscription</div>
+                </div>
+                <div class="action-card" onclick="window.open('/api-docs#test-apis', '_blank')">
+                    <div class="action-icon">
+                        <i class="fas fa-vial"></i>
+                    </div>
+                    <div class="action-title">Test APIs</div>
+                    <div class="action-desc">Test your API integration</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBMUi291fwb-HSxlGPQMxdEJGUTiOOvFBs",
+            authDomain: "nexaverse-eeb07.firebaseapp.com",
+            projectId: "nexaverse-eeb07",
+            storageBucket: "nexaverse-eeb07.appspot.com",
+            messagingSenderId: "686342300627",
+            appId: "1:686342300627:web:90522d8f1129fb00b08526",
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // DOM Elements
+        const authButton = document.getElementById('authButton');
+        const userAvatar = document.getElementById('userAvatar');
+        const userAvatarLarge = document.getElementById('userAvatarLarge');
+        const userDropdown = document.getElementById('userDropdown');
+        const signOutBtn = document.getElementById('signOutBtn');
+        const loginPrompt = document.getElementById('loginPrompt');
+        const dashboardContent = document.getElementById('dashboardContent');
+        const userName = document.getElementById('userName');
+        const userEmail = document.getElementById('userEmail');
+        const userStatus = document.getElementById('userStatus');
+        const premiumBadge = document.getElementById('premiumBadge');
+        const apiKeyValue = document.getElementById('apiKeyValue');
+        const toggleText = document.getElementById('toggleText');
+        const usageToday = document.getElementById('usageToday');
+        const dailyLimit = document.getElementById('dailyLimit');
+        const usageProgress = document.getElementById('usageProgress');
+        const usageRemaining = document.getElementById('usageRemaining');
+        const usagePercentage = document.getElementById('usagePercentage');
+        const usageMessage = document.getElementById('usageMessage');
+        const upgradeBtn = document.getElementById('upgradeBtn');
+        const toast = document.getElementById('toast');
+
+        // State variables
+        let isApiKeyVisible = false;
+        let userApiKey = '';
+        let userData = {};
+
+        // Generate API Key function
+        function generateApiKey() {
+            const prefix = 'PB-';
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = prefix;
+            
+            for (let i = 0; i < 16; i++) {
+                result += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            
+            return result;
+        }
+
+        // Check if it's a new day and reset API calls if needed
+        function checkAndResetDailyUsage(userDocRef, userData) {
+            const today = new Date().toISOString().split('T')[0];
+            const lastResetDate = userData.lastApiResetDate || '';
+            
+            if (lastResetDate !== today) {
+                // Reset daily usage
+                userDocRef.update({
+                    apiCallsToday: 0,
+                    lastApiResetDate: today
+                });
+                
+                userData.apiCallsToday = 0;
+                userData.lastApiResetDate = today;
+                
+                // Update UI
+                updateUsageUI(userData);
+            }
+        }
+
+        // Update usage UI based on user data
+        function updateUsageUI(userData) {
+            const isPremium = userData.role === 'premium' || userData.premium;
+            const dailyLimitValue = isPremium ? 100000 : 10000;
+            const apiCallsToday = userData.apiCallsToday || 0;
+            const usagePercent = Math.min(100, (apiCallsToday / dailyLimitValue) * 100);
+            const remainingCalls = dailyLimitValue - apiCallsToday;
+            
+            // Update UI elements
+            usageToday.textContent = apiCallsToday.toLocaleString();
+            dailyLimit.textContent = dailyLimitValue.toLocaleString();
+            usageProgress.style.width = `${usagePercent}%`;
+            usageRemaining.textContent = `${remainingCalls.toLocaleString()} calls remaining`;
+            usagePercentage.textContent = `${Math.round(usagePercent)}%`;
+            
+            // Update progress bar color based on usage
+            if (usagePercent > 90) {
+                usageProgress.style.background = 'var(--error-color)';
+            } else if (usagePercent > 75) {
+                usageProgress.style.background = 'var(--warning-color)';
+            } else {
+                usageProgress.style.background = 'var(--gradient-bg)';
+            }
+            
+            // Show upgrade button for non-premium users
+            if (!isPremium) {
+                upgradeBtn.style.display = 'block';
+                usageMessage.innerHTML = 'Upgrade to <strong>Premium</strong> for 100,000 daily API calls!';
+            } else {
+                upgradeBtn.style.display = 'none';
+                usageMessage.textContent = 'You have premium access with 100,000 daily API calls.';
+            }
+        }
+
+        // Toggle API key visibility
+        function toggleApiKeyVisibility() {
+            isApiKeyVisible = !isApiKeyVisible;
+            
+            if (isApiKeyVisible) {
+                apiKeyValue.textContent = userApiKey;
+                apiKeyValue.classList.remove('api-key-masked');
+                toggleText.textContent = 'Hide';
+            } else {
+                apiKeyValue.textContent = 'PB-' + '•'.repeat(16);
+                apiKeyValue.classList.add('api-key-masked');
+                toggleText.textContent = 'Show';
+            }
+        }
+
+        // Copy API key to clipboard
+        function copyApiKey() {
+            navigator.clipboard.writeText(userApiKey).then(() => {
+                showToast('API key copied to clipboard!', 'success');
+            }).catch(() => {
+                showToast('Failed to copy API key', 'error');
+            });
+        }
+
+        // Regenerate API key
+        function regenerateApiKey() {
+            if (!confirm('Are you sure you want to regenerate your API key? This will invalidate your current key.')) {
+                return;
+            }
+
+            const newApiKey = generateApiKey();
+            const user = auth.currentUser;
+            
+            if (!user) return;
+
+            // Show loading state
+            const regenerateBtn = document.querySelector('.btn-warning');
+            const originalText = regenerateBtn.innerHTML;
+            regenerateBtn.innerHTML = '<div class="loading"></div> Regenerating...';
+            regenerateBtn.disabled = true;
+
+            // Update in Firestore
+            db.collection('users').doc(user.uid).update({
+                apiKey: newApiKey,
+                apiKeyGeneratedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                userApiKey = newApiKey;
+                if (isApiKeyVisible) {
+                    apiKeyValue.textContent = userApiKey;
+                }
+                showToast('API key regenerated successfully!', 'success');
+            }).catch(error => {
+                console.error('Error regenerating API key:', error);
+                showToast('Failed to regenerate API key', 'error');
+            }).finally(() => {
+                regenerateBtn.innerHTML = originalText;
+                regenerateBtn.disabled = false;
+            });
+        }
+
+        // Show toast notification
+        function showToast(message, type) {
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Load user data
+        function loadUserData(user) {
+            const userDocRef = db.collection('users').doc(user.uid);
+            
+            userDocRef.get().then(doc => {
+                if (doc.exists) {
+                    userData = doc.data();
+                    
+                    // Set user info
+                    userName.textContent = userData.displayName || user.displayName || 'User';
+                    userEmail.textContent = user.email;
+                    
+                    // Set API key
+                    if (userData.apiKey) {
+                        userApiKey = userData.apiKey;
+                    } else {
+                        // Generate API key if it doesn't exist
+                        userApiKey = generateApiKey();
+                        userDocRef.update({
+                            apiKey: userApiKey,
+                            apiKeyGeneratedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    }
+                    
+                    // Set avatar
+                    const avatarUrl = userData.avatarUrl || user.photoURL || `https://ui-avatars.com/api/?name=${userName.textContent}&background=6A1B9A&color=FFFFFF&bold=true`;
+                    userAvatar.src = avatarUrl;
+                    userAvatarLarge.src = avatarUrl;
+                    
+                    // Set usage stats
+                    document.getElementById('apiCalls').textContent = (userData.totalApiCalls || 0).toLocaleString();
+                    document.getElementById('appsCreated').textContent = userData.appsCreated || 0;
+                    
+                    // Check and reset daily usage if needed
+                    checkAndResetDailyUsage(userDocRef, userData);
+                    
+                    // Update UI based on premium status
+                    const isPremium = userData.role === 'premium' || userData.premium;
+                    if (isPremium) {
+                        userStatus.style.display = 'none';
+                        premiumBadge.style.display = 'inline-block';
+                        document.querySelector('.user-info-card').style.borderLeftColor = 'var(--premium-color)';
+                    } else {
+                        userStatus.style.display = 'inline-block';
+                        premiumBadge.style.display = 'none';
+                    }
+                }
+            }).catch(error => {
+                console.error('Error loading user data:', error);
+            });
+            
+            // Listen for real-time updates
+            userDocRef.onSnapshot(doc => {
+                if (doc.exists) {
+                    userData = doc.data();
+                    updateUsageUI(userData);
+                }
+            });
+        }
+
+        // Auth state listener
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                // User is signed in
+                authButton.style.display = 'none';
+                userAvatar.src = user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName || user.email}&background=6A1B9A&color=FFFFFF&bold=true`;
+                userAvatar.style.display = 'block';
+                loginPrompt.style.display = 'none';
+                dashboardContent.style.display = 'block';
+                
+                // Load user data
+                loadUserData(user);
+            } else {
+                // User is signed out
+                authButton.style.display = 'block';
+                userAvatar.style.display = 'none';
+                loginPrompt.style.display = 'block';
+                dashboardContent.style.display = 'none';
+            }
+        });
+
+        // Event listeners
+        userAvatar.addEventListener('click', (e) => {
+            e.stopPropagation();
+            userDropdown.classList.toggle('show');
+        });
+
+        signOutBtn.addEventListener('click', () => {
+            auth.signOut().then(() => {
+                userDropdown.classList.remove('show');
+                showToast('Signed out successfully', 'success');
+            });
+        });
+
+        // Close dropdown when clicking outside
+        window.addEventListener('click', (e) => {
+            if (!e.target.closest('.user-avatar') && !e.target.closest('.user-dropdown')) {
+                userDropdown.classList.remove('show');
+            }
+        });
+
+        // Simple auth modal (you can replace with your actual auth modal)
+        function showAuthModal() {
+            // This would open your auth modal
+            // For now, we'll just redirect to the sign in page
+            window.location.href = '/user/signin';
+        }
+    </script>
+</body>
+</html>
