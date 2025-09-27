@@ -4,7 +4,7 @@
   "description": "Probe App - App Store",
   "scripts": {
     "dev": "vercel dev",
-    "build": "echo 'Building function assets...' && exit 0",
+    "build": "[my-framework] build --output ."
     "start": "vercel start"
   },
   "dependencies": {
