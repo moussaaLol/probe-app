@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Dashboard - Probe App</title>
+    <title id="title">User Dashboard - Probe App</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
@@ -881,6 +881,7 @@
         const loginPrompt = document.getElementById('loginPrompt');
         const dashboardContent = document.getElementById('dashboardContent');
         const userName = document.getElementById('userName');
+        const titlename = document.getElementById('title');
         const userEmail = document.getElementById('userEmail');
         const userStatus = document.getElementById('userStatus');
         const premiumBadge = document.getElementById('premiumBadge');
@@ -1048,6 +1049,7 @@
                     // Set user info
                     userName.textContent = userData.displayName || user.displayName || 'User';
                     userEmail.textContent = user.email;
+                    titlename.textContent = user.displayName + " Dashboard - " + user.Role
                     
                     // Set API key
                     if (userData.apiKey) {
