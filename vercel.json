@@ -1,13 +1,21 @@
 {
   "outputDirectory": ".",
+  "redirects": [
+    {
+      "source": "/browse/app", 
+      "destination": "/api/app/[id].js",
+      "permanent": false
+    },
+    {
+      "source": "/browse/app?id=:id", 
+      "destination": "/api/app/[id].js?id=:id",
+      "permanent": false
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/search",
       "destination": "/api/search.js"
-    },
-    {
-      "source": "/browse/app(.*)",
-      "destination": "/api/app/[id].js$1"
     }
   ],
   "cleanUrls": true,
