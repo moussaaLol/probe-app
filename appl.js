@@ -17,10 +17,6 @@ const db = firebase.firestore();
 const stripe = Stripe('pk_test_51S9TzxQ08peRv6NQE5mL8DCVbxc2k4fs7MI3n0jEBO9n3vwqFEFBYLuw7PJFaM93tldlrdoM5j1JHbCi5DliIFCS00mIdukMoc'); // Replace with your Stripe publishable key
 
 // DOM Elements
-/*  appThumbnail.src = currentApp.thumbnail;
-        appTitle.textContent = currentApp.title;
-        appPublisher.textContent = currentApp.publisher || 'Unknown Publisher';
-        appDescription.textContent = currentApp.Mdesc || currentApp.description || 'No description available.'; */
 const authButton = document.getElementById('authButton');
 const userAvatar = document.getElementById('userAvatar');
 const userDropdown = document.getElementById('userDropdown');
@@ -29,12 +25,6 @@ const notificationBadge = document.getElementById('notificationBadge');
 const notificationPopup = document.getElementById('notificationPopup');
 const notificationList = document.getElementById('notificationList');
 const signOutBtn = document.getElementById('signOutBtn');
-// meta head
-  // 1. Get the meta tag elements
-    const ogTitle = document.getElementById('Etitle');
-    const ogDescription = document.getElementById('Edesc');
-    const ogImage = document.getElementById('Eimage'); 
-
 
 // App Details Elements
 const appThumbnail = document.getElementById('appThumbnail');
@@ -55,6 +45,8 @@ const confirmModalOverlay = document.getElementById('confirmModalOverlay');
 const confirmYesBtn = document.getElementById('confirmYesBtn');
 const confirmNoBtn = document.getElementById('confirmNoBtn');
 const userEmailDisplay = document.getElementById('userEmailDisplay');
+// Ensure purchaseAmount is defined if used in handlePurchase/confirmPurchase
+// const purchaseAmount = document.getElementById('purchaseAmount'); // If this was missing, uncomment and fix HTML/variable name
 
 // Get app ID from URL
 const urlParams = new URLSearchParams(window.location.search);
@@ -77,39 +69,15 @@ function loadAppDetails() {
         currentApp = doc.data();
         currentApp.id = doc.id;
         
-        // Set app details
-        
+        // Set app details on the page (These are for the user's view and work client-side)
         appThumbnail.src = currentApp.thumbnail;
         appTitle.textContent = currentApp.title;
         appPublisher.textContent = currentApp.publisher || 'Unknown Publisher';
         appDescription.textContent = currentApp.Mdesc || currentApp.description || 'No description available.';
-         if (ogTitle) {
-        ogTitle.setAttribute('content', currentApp.title + " is on Probe-App!");
-    }
-    
-    if (ogDescription) {
-        ogDescription.setAttribute('content', currentApp.description);
-    }
-    const currentBrowserURL = window.location.href; 
-    
-    // Select the meta tag
-    const ogUrlElement = document.querySelector('meta[property="og:url"]');
-
-    // Update the content attribute
-    if (ogUrlElement) {
-        ogUrlElement.setAttribute('content', currentBrowserURL);
-    }
-    if (ogImage) {
-        ogImage.setAttribute('content', currentApp.thumbnail);
-        // You may also want to update the og:image:alt tag if it exists
-        const ogImageAlt = document.querySelector('meta[property="og:image:alt"]');
-        if (ogImageAlt) {
-            ogImageAlt.setAttribute('content', 'Probe App');
-        }
-    }
-
-    // Optional: Update the standard <title> tag as well
-    document.title = "Probe-App: " + currentApp.title;
+        
+        // The document.title is safe to update here, but the OG tags MUST be done server-side.
+        document.title = "Probe-App: " + currentApp.title;
+        
         // Set price and download button
         if (currentApp.isPaid) {
             appPrice.textContent = `$${currentApp.price}`;
@@ -132,7 +100,8 @@ function loadAppDetails() {
         loadReviews();
     }).catch(error => {
         console.error('Error loading app:', error);
-        window.location.href = '/browse';
+        // Do NOT redirect, as the Vercel function might handle the initial load
+        // window.location.href = '/browse'; 
     });
 }
 
@@ -152,6 +121,9 @@ function handlePurchase() {
     }
     
     // Show confirmation modal
+    // Check for userEmailDisplay and purchaseAmount (assuming purchaseAmount exists)
+    const purchaseAmount = document.getElementById('purchaseAmount'); // Re-declared for safety
+
     if (userEmailDisplay && purchaseAmount) {
         userEmailDisplay.textContent = auth.currentUser.email;
         purchaseAmount.textContent = `$${currentApp.price}`;
@@ -172,9 +144,8 @@ function confirmPurchase() {
 }
 
 // Create Stripe checkout session
-// Create Stripe checkout session
 async function createStripeCheckout() {
-  try {
+ try {
     // Show loading state
     downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
     downloadBtn.disabled = true;
@@ -209,59 +180,59 @@ async function createStripeCheckout() {
     if (result.error) {
       alert(result.error.message);
     }
-  } catch (error) {
+ } catch (error) {
     console.error('Error creating checkout session:', error);
     alert(error.message || 'Failed to initiate payment. Please try again.');
-  } finally {
+ } finally {
     // Reset button state
-    if (currentApp.isPaid) {
+    if (currentApp && currentApp.isPaid) {
       downloadBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> Buy Now';
     } else {
       downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download';
     }
     downloadBtn.disabled = false;
-  }
+ }
 }
 
 // Verify payment and assign premium role
 async function verifyPaymentAndAssignRole() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const sessionId = urlParams.get('session_id');
-  
-  if (sessionId) {
-    try {
-      const response = await fetch('/api/verify-payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ sessionId }),
-      });
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('session_id');
+    
+    if (sessionId) {
+        try {
+            const response = await fetch('/api/verify-payment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ sessionId }),
+            });
 
-      if (!response.ok) {
-        throw new Error('Server error: ' + response.status);
-      }
+            if (!response.ok) {
+                throw new Error('Server error: ' + response.status);
+            }
 
-      const result = await response.json();
+            const result = await response.json();
 
-      if (result.success) {
-        // Assign premium role to user
-        await db.collection('users').doc(auth.currentUser.uid).set({
-          premium: true,
-          premiumSince: new Date(),
-          purchasedApps: firebase.firestore.FieldValue.arrayUnion(currentApp.id)
-        }, { merge: true });
+            if (result.success) {
+                // Assign premium role to user
+                await db.collection('users').doc(auth.currentUser.uid).set({
+                    premium: true,
+                    premiumSince: new Date(),
+                    purchasedApps: firebase.firestore.FieldValue.arrayUnion(currentApp.id)
+                }, { merge: true });
 
-        // Show success message
-        alert('Payment successful! Premium features have been activated.');
-      } else {
-        alert('Payment verification failed. Please contact support.');
-      }
-    } catch (error) {
-      console.error('Error verifying payment:', error);
-      alert('Error verifying payment. Please contact support.');
+                // Show success message
+                alert('Payment successful! Premium features have been activated.');
+            } else {
+                alert('Payment verification failed. Please contact support.');
+            }
+        } catch (error) {
+            console.error('Error verifying payment:', error);
+            alert('Error verifying payment. Please contact support.');
+        }
     }
-  }
 }
 
 // Modal functions
