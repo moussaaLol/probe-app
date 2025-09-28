@@ -16,7 +16,7 @@ const db = admin.firestore();
 
 // Define the path to your template file
 // Assuming the template is now at the root or a known path like '/app-template.html'
-const TEMPLATE_PATH = path.join(process.cwd(), '/template/browse/app.html'); 
+const TEMPLATE_PATH = path.join(process.cwd(), 'template' ,'browse', 'app.html'); 
 // Adjust the string 'app-template.html' if you placed it somewhere else.
 
 module.exports = async (req, res) => {
