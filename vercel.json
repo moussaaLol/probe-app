@@ -5,12 +5,6 @@
       "source": "/api/search",
       "destination": "/api/search.js"
     },
-    // Rewrite for /browse/app?id=... (Handles the query parameter)
-    {
-      "source": "/browse/app/(.*)", 
-      "destination": "/api/app/[id].js?id=$1"
-    },
-    // Keep a simple rule for /browse/app (without parameters)
     {
       "source": "/browse/app", 
       "destination": "/api/app/[id].js"
