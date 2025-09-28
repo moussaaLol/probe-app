@@ -5,9 +5,12 @@
       "source": "/api/search",
       "destination": "/api/search.js"
     },
+    // NEW, MORE SPECIFIC REWRITE
     {
-      "source": "/browse/app", 
-      "destination": "/api/app/[id].js"
+      // Matches /browse/app and all its query parameters
+      "source": "/browse/app(.*)", 
+      "destination": "/api/app/[id].js$1" 
+      // $1 captures the query string (e.g., ?id=...) and appends it to the destination
     }
   ],
   "cleanUrls": true,
