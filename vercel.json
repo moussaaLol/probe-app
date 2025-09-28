@@ -1,24 +1,16 @@
 {
   "outputDirectory": ".",
-  "redirects": [
-    {
-      "source": "/browse/app", 
-      "destination": "/api/app/[id].js",
-      "permanent": false
-    },
-    {
-      "source": "/browse/app?id=:id", 
-      "destination": "/api/app/[id].js?id=:id",
-      "permanent": false
-    }
-  ],
+  "cleanUrls": true,
   "rewrites": [
     {
-      "source": "/api/search",
-      "destination": "/api/search.js"
+      "source": "/browse/app",
+      "destination": "/api/app/[id]"
+    },
+    {
+      "source": "/browse/app/:id",
+      "destination": "/api/app/[id]"
     }
   ],
-  "cleanUrls": true,
   "functions": {
     "api/app/[id].js": {
       "includeFiles": "template/browse/app.html"
