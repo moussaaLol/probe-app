@@ -13,7 +13,9 @@
     --hover-shadow: 0 15px 35px rgba(106, 27, 154, 0.25);
     --smooth-transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
-
+.a {
+  text-decoration: none;
+}
 * {
     margin: 0;
     padding: 0;
