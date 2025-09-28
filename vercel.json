@@ -4,6 +4,14 @@
     {
       "source": "/api/search",
       "destination": "/api/search.js"
+    },
+    {
+      "source": "/browse/app", 
+      "destination": "/api/app/[id].js"
+    },
+    {
+      "source": "/browse/app?id=:id",
+      "destination": "/api/app/[id].js?id=:id"
     }
   ],
   "cleanUrls": true
