@@ -17,7 +17,10 @@ const db = firebase.firestore();
 const stripe = Stripe('pk_test_51S9TzxQ08peRv6NQE5mL8DCVbxc2k4fs7MI3n0jEBO9n3vwqFEFBYLuw7PJFaM93tldlrdoM5j1JHbCi5DliIFCS00mIdukMoc'); // Replace with your Stripe publishable key
 
 // DOM Elements
-
+/*  appThumbnail.src = currentApp.thumbnail;
+        appTitle.textContent = currentApp.title;
+        appPublisher.textContent = currentApp.publisher || 'Unknown Publisher';
+        appDescription.textContent = currentApp.Mdesc || currentApp.description || 'No description available.'; */
 const authButton = document.getElementById('authButton');
 const userAvatar = document.getElementById('userAvatar');
 const userDropdown = document.getElementById('userDropdown');
@@ -26,6 +29,12 @@ const notificationBadge = document.getElementById('notificationBadge');
 const notificationPopup = document.getElementById('notificationPopup');
 const notificationList = document.getElementById('notificationList');
 const signOutBtn = document.getElementById('signOutBtn');
+// meta head
+  // 1. Get the meta tag elements
+    const ogTitle = document.getElementById('Etitle');
+    const ogDescription = document.getElementById('Edesc');
+    const ogImage = document.getElementById('Eimage'); 
+
 
 // App Details Elements
 const appThumbnail = document.getElementById('appThumbnail');
@@ -69,11 +78,38 @@ function loadAppDetails() {
         currentApp.id = doc.id;
         
         // Set app details
+        
         appThumbnail.src = currentApp.thumbnail;
         appTitle.textContent = currentApp.title;
         appPublisher.textContent = currentApp.publisher || 'Unknown Publisher';
         appDescription.textContent = currentApp.Mdesc || currentApp.description || 'No description available.';
-        
+         if (ogTitle) {
+        ogTitle.setAttribute('content', currentApp.title + " is on Probe-App!");
+    }
+    
+    if (ogDescription) {
+        ogDescription.setAttribute('content', currentApp.description);
+    }
+    const currentBrowserURL = window.location.href; 
+    
+    // Select the meta tag
+    const ogUrlElement = document.querySelector('meta[property="og:url"]');
+
+    // Update the content attribute
+    if (ogUrlElement) {
+        ogUrlElement.setAttribute('content', currentBrowserURL);
+    }
+    if (ogImage) {
+        ogImage.setAttribute('content', currentApp.thumbnail);
+        // You may also want to update the og:image:alt tag if it exists
+        const ogImageAlt = document.querySelector('meta[property="og:image:alt"]');
+        if (ogImageAlt) {
+            ogImageAlt.setAttribute('content', 'Probe App');
+        }
+    }
+
+    // Optional: Update the standard <title> tag as well
+    document.title = "Probe-App: " + currentApp.title;
         // Set price and download button
         if (currentApp.isPaid) {
             appPrice.textContent = `$${currentApp.price}`;
@@ -85,7 +121,7 @@ function loadAppDetails() {
             appPrice.classList.add('free-badge');
             downloadBtn.textContent = 'Download';
             downloadBtn.onclick = () => {
-                window.location.href = currentApp.downloadUrl || '#';
+                window.location.href = currentApp.download || '#';
             };
         }
 
