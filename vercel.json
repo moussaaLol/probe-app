@@ -10,5 +10,11 @@
       "destination": "/api/app/[id].js"
     }
   ],
-  "cleanUrls": true
+  "cleanUrls": true,
+  // ADD THIS BLOCK to ensure Vercel includes the template file with the function
+  "functions": {
+    "api/app/[id].js": {
+      "includeFiles": "template/browse/app.html"
+    }
+  }
 }
