@@ -679,6 +679,22 @@ nav {
         font-size: 1.5rem;
     }
 }
+
+/* Loading Spinner */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255,255,255,.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+    margin-right: 10px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
     </style>
 </head>
 <body>
@@ -697,16 +713,18 @@ nav {
             <img id="userAvatar" class="user-avatar" src="" alt="User Avatar" style="display: none;">
         </div>
 
-        
-
         <div id="userDropdown" class="user-dropdown">
-            <div class="dropdown-item">
+            <div class="dropdown-item" onclick="window.location.href='/dashboard'">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </div>
+            <div class="dropdown-item" onclick="window.location.href='/profile'">
                 <i class="fas fa-user"></i>
                 <span>Profile</span>
             </div>
-            <div class="dropdown-item">
-                <i class="fas fa-cog"></i>
-                <span>Settings</span>
+            <div class="dropdown-item" onclick="window.location.href='/api-docs'">
+                <i class="fas fa-code"></i>
+                <span>API Docs</span>
             </div>
             <div class="dropdown-divider"></div>
             <div id="signOutBtn" class="dropdown-item">
@@ -721,41 +739,47 @@ nav {
         
         <form class="submission-form" id="appSubmissionForm">
             <div class="form-group">
-                <label for="appTitle" class="form-label">App Title</label>
-                <input type="text" id="appTitle" class="form-input" required>
+                <label for="appTitle" class="form-label"><i class="fas fa-heading"></i>App Title</label>
+                <input type="text" id="appTitle" class="form-input" placeholder="Enter your app name" required>
             </div>
             
             <div class="form-group">
-                <label for="appDescription" class="form-label">Short Description (max 100 characters)</label>
-                <textarea id="appDescription" class="form-input form-textarea" maxlength="100" required></textarea>
+                <label for="appDescription" class="form-label"><i class="fas fa-align-left"></i>Short Description (max 100 characters)</label>
+                <textarea id="appDescription" class="form-input form-textarea" maxlength="100" placeholder="Briefly describe your app" required></textarea>
                 <div class="char-count"><span id="charCount">0</span>/100</div>
             </div>
             
             <div class="form-group">
-                <label for="publisherName" class="form-label">Publisher Name</label>
-                <input type="text" id="publisherName" class="form-input" required>
+                <label for="appCategory" class="form-label"><i class="fas fa-tags"></i>Category</label>
+                <select id="appCategory" class="form-input" required>
+                    <option value="">Select a category</option>
+                    <option value="games">Games</option>
+                    <option value="productivity">Productivity</option>
+                    <option value="social">Social</option>
+                    <option value="education">Education</option>
+                    <option value="utilities">Utilities</option>
+                    <option value="entertainment">Entertainment</option>
+                    <option value="health">Health & Fitness</option>
+                    <option value="business">Business</option>
+                    <option value="other">Other</option>
+                </select>
             </div>
             
             <div class="form-group">
-                <label for="contactEmail" class="form-label">Contact Email</label>
-                <input type="email" id="contactEmail" class="form-input" required>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">App Thumbnail</label>
+                <label class="form-label"><i class="fas fa-image"></i>App Thumbnail</label>
                 <div class="file-upload" id="thumbnailUpload">
                     <i class="fas fa-cloud-upload-alt"></i>
-                    <div class="file-upload-text">Click to upload thumbnail image</div>
+                    <div class="file-upload-text">Click to upload thumbnail image <span>(PNG, JPG, max 5MB)</span></div>
                     <div class="file-name" id="thumbnailFileName"></div>
                     <input type="file" id="thumbnailInput" accept="image/*" style="display: none;">
                 </div>
             </div>
             
             <div class="form-group">
-                <label class="form-label">APK File</label>
+                <label class="form-label"><i class="fas fa-file-archive"></i>APK File</label>
                 <div class="file-upload" id="apkUpload">
                     <i class="fas fa-cloud-upload-alt"></i>
-                    <div class="file-upload-text">Click to upload APK file</div>
+                    <div class="file-upload-text">Click to upload APK file <span>(Max 500MB)</span></div>
                     <div class="file-name" id="apkFileName"></div>
                     <input type="file" id="apkInput" accept=".apk" style="display: none;">
                 </div>
@@ -775,206 +799,276 @@ nav {
             </div>
             <h2 class="modal-title">Submission Successful!</h2>
             <p class="modal-message">
-                Your app has been sent for approval. We will reach out to you within 24h via email.
+                Your app has been sent for approval. We will review it within 24-48 hours.
                 <br><br>
-                Check <span class="modal-email" id="modalEmail"></span> for updates.
+                You'll receive updates at: <span class="modal-email" id="modalEmail"></span>
             </p>
-            <button class="modal-close-btn" id="modalCloseBtn">Close</button>
+            <button class="modal-close-btn" id="modalCloseBtn">Return to Dashboard</button>
         </div>
     </div>
 
     <script>
-// Firebase Configuration
-const firebaseConfig = {
-    apiKey: "AIzaSyBMUi291fwb-HSxlGPQMxdEJGUTiOOvFBs",
-    authDomain: "nexaverse-eeb07.firebaseapp.com",
-    projectId: "nexaverse-eeb07",
-    storageBucket: "nexaverse-eeb07.appspot.com",
-    messagingSenderId: "686342300627",
-    appId: "1:686342300627:web:90522d8f1129fb00b08526",
-};
-
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-const storage = firebase.storage();
-
-// DOM Elements
-const authButton = document.getElementById('authButton');
-const userAvatar = document.getElementById('userAvatar');
-const userDropdown = document.getElementById('userDropdown');
-const notificationBell = document.getElementById('notificationBell');
-const notificationBadge = document.getElementById('notificationBadge');
-const notificationPopup = document.getElementById('notificationPopup');
-const notificationList = document.getElementById('notificationList');
-const signOutBtn = document.getElementById('signOutBtn');
-const appSubmissionForm = document.getElementById('appSubmissionForm');
-const submitBtn = document.getElementById('submitBtn');
-const successModal = document.getElementById('successModal');
-const modalEmail = document.getElementById('modalEmail');
-const modalCloseBtn = document.getElementById('modalCloseBtn');
-
-// Discord Webhook URL (decoded)
-const DISCORD_WEBHOOK_URL = 'https://l.webhook.party/hook/2qAuSmcvDcC04P97sfMdLbW9SQrbO9a9wKMfwqrV68LdbABBC+wpOrb6g5MWbNRR+gS8dcHbSIRbNWfouABeWRwLnowFKNoxJ8Pvag2Ztx+o/stIkt+2GBCMRSMYIbV4GATCVdWHBHz0a70rBpiutsIiTO3omYwy+AS8KWmRUWUXBnHg/HBFarfID6SwT/BN2Uh1AaqBU6POHMDf5VFvdHLMkEA0X/GbR4KSElb7/mAIe3NJc404HAZdtoLdGK24WVFWgUX7ti9TCG0HmaG0rG4szJ6l9aocnhn/XO5yfX7BGMrb70XKYH/uCRU/DSQ3lxpq9vAXtmCgmKjq8U8dsoIv0iIaCmOwonVcUjmxol3W9dAOOJ38s3tx32MPUuEB1so1l9HhVEQ=/df1XvNoTjYHb/9o/';
-
-// Form submission
-appSubmissionForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    if (!auth.currentUser) {
-        alert('Please sign in to submit an app.');
-        return;
-    }
-
-    // Validate form
-    const thumbnailFile = document.getElementById('thumbnailInput').files[0];
-    const apkFile = document.getElementById('apkInput').files[0];
-    
-    if (!thumbnailFile) {
-        alert('Please upload a thumbnail image.');
-        return;
-    }
-
-    if (!apkFile) {
-        alert('Please upload an APK file.');
-        return;
-    }
-
-    // Disable submit button
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
-
-    try {
-        const userId = auth.currentUser.uid;
-        const userEmail = auth.currentUser.email;
-        const timestamp = firebase.firestore.FieldValue.serverTimestamp();
-        
-        // 1. Upload thumbnail
-        const thumbnailRef = storage.ref(`submissions/${userId}/${Date.now()}_${thumbnailFile.name}`);
-        const thumbnailSnapshot = await thumbnailRef.put(thumbnailFile);
-        const thumbnailUrl = await thumbnailSnapshot.ref.getDownloadURL();
-        
-        // 2. Upload APK
-        const apkRef = storage.ref(`submissions/${userId}/${Date.now()}_${apkFile.name}`);
-        const apkSnapshot = await apkRef.put(apkFile);
-        const apkUrl = await apkSnapshot.ref.getDownloadURL();
-        
-        // 3. Create submission document
-        const submissionData = {
-            title: document.getElementById('appTitle').value,
-            description: document.getElementById('appDescription').value,
-            publisher: document.getElementById('publisherName').value,
-            contactEmail: document.getElementById('contactEmail').value,
-            thumbnailUrl: thumbnailUrl,
-            apkUrl: apkUrl,
-            userId: userId,
-            userEmail: userEmail,
-            status: 'pending',
-            createdAt: timestamp,
-            updatedAt: timestamp
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBMUi291fwb-HSxlGPQMxdEJGUTiOOvFBs",
+            authDomain: "nexaverse-eeb07.firebaseapp.com",
+            projectId: "nexaverse-eeb07",
+            storageBucket: "nexaverse-eeb07.appspot.com",
+            messagingSenderId: "686342300627",
+            appId: "1:686342300627:web:90522d8f1129fb00b08526",
         };
-        
-        // 4. Save to Firestore
-        await db.collection('submissions').add(submissionData);
-        
-        // 5. Send to Discord webhook (with error handling)
-        try {
-            const embed = {
-                title: 'New App Submission',
-                color: 0x6A1B9A,
-                fields: [
-                    { name: 'App Title', value: submissionData.title },
-                    { name: 'Publisher', value: submissionData.publisher },
-                    { name: 'Description', value: submissionData.description },
-                    { name: 'Contact Email', value: submissionData.contactEmail },
-                    { name: 'Submitted By', value: userEmail },
-                    { name: 'Thumbnail', value: `[View](${thumbnailUrl})` },
-                    { name: 'APK', value: `[Download](${apkUrl})` }
-                ],
-                timestamp: new Date().toISOString()
-            };
 
-            const response = await fetch(DISCORD_WEBHOOK_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ embeds: [embed] })
-            });
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const storage = firebase.storage();
 
-            if (!response.ok) {
-                console.error('Discord webhook error:', response.status);
-            }
-        } catch (webhookError) {
-            console.error('Webhook failed (non-critical):', webhookError);
+        // DOM Elements
+        const authButton = document.getElementById('authButton');
+        const userAvatar = document.getElementById('userAvatar');
+        const userDropdown = document.getElementById('userDropdown');
+        const signOutBtn = document.getElementById('signOutBtn');
+        const appSubmissionForm = document.getElementById('appSubmissionForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const successModal = document.getElementById('successModal');
+        const modalEmail = document.getElementById('modalEmail');
+        const modalCloseBtn = document.getElementById('modalCloseBtn');
+        const charCount = document.getElementById('charCount');
+        const appDescription = document.getElementById('appDescription');
+
+        // File upload elements
+        const thumbnailUpload = document.getElementById('thumbnailUpload');
+        const thumbnailInput = document.getElementById('thumbnailInput');
+        const thumbnailFileName = document.getElementById('thumbnailFileName');
+        const apkUpload = document.getElementById('apkUpload');
+        const apkInput = document.getElementById('apkInput');
+        const apkFileName = document.getElementById('apkFileName');
+
+        // Current user data
+        let currentUser = null;
+        let currentUserData = null;
+
+        // Initialize the page
+        function init() {
+            setupEventListeners();
+            checkAuthState();
         }
-        
-        // 6. Show success modal
-        modalEmail.textContent = userEmail;
-        successModal.classList.add('show');
-        
-        // 7. Reset form
-        appSubmissionForm.reset();
-        document.getElementById('thumbnailFileName').style.display = 'none';
-        document.getElementById('apkFileName').style.display = 'none';
-        document.getElementById('charCount').textContent = '0';
-        
-    } catch (error) {
-        console.error('Submission error:', error);
-        alert('Submission failed. Please check console for details.');
-    } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send for Approval';
-    }
-});
 
-// Modal close button
-modalCloseBtn.addEventListener('click', () => {
-    successModal.classList.remove('show');
-});
-
-// Auth state listener
-auth.onAuthStateChanged(user => {
-    if (user) {
-        authButton.style.display = 'none';
-        userAvatar.src = user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName || user.email}&background=6A1B9A&color=FFFFFF&bold=true`;
-        userAvatar.style.display = 'block';
-        
-        // Pre-fill email if available
-        document.getElementById('contactEmail').value = user.email || '';
-    } else {
-        authButton.style.display = 'block';
-        userAvatar.style.display = 'none';
-        window.location.href = '/login'; // Redirect if not logged in
-    }
-});
-
-// Other event listeners (notification, dropdown, etc.) remain the same
-        // Event listeners
-        notificationBell.addEventListener('click', () => {
-            notificationPopup.classList.toggle('show');
-        });
-
-        userAvatar.addEventListener('click', (e) => {
-            e.stopPropagation();
-            userDropdown.classList.toggle('show');
-        });
-
-        signOutBtn.addEventListener('click', () => {
-            auth.signOut().then(() => {
-                userDropdown.classList.remove('show');
+        // Set up all event listeners
+        function setupEventListeners() {
+            // Auth button
+            authButton.addEventListener('click', () => {
+                window.location.href = '/user/signin';
             });
-        });
 
-        // Close dropdowns when clicking outside
-        window.addEventListener('click', (e) => {
-            if (!e.target.closest('.notification-bell') && !e.target.closest('.notification-popup')) {
-                notificationPopup.classList.remove('show');
-            }
+            // User dropdown
+            userAvatar.addEventListener('click', (e) => {
+                e.stopPropagation();
+                userDropdown.classList.toggle('show');
+            });
+
+            // Sign out
+            signOutBtn.addEventListener('click', () => {
+                auth.signOut();
+            });
+
+            // Close dropdown when clicking outside
+            window.addEventListener('click', (e) => {
+                if (!e.target.closest('.user-avatar') && !e.target.closest('.user-dropdown')) {
+                    userDropdown.classList.remove('show');
+                }
+            });
+
+            // Character count for description
+            appDescription.addEventListener('input', () => {
+                charCount.textContent = appDescription.value.length;
+            });
+
+            // File upload handlers
+            thumbnailUpload.addEventListener('click', () => thumbnailInput.click());
+            thumbnailInput.addEventListener('change', handleThumbnailUpload);
             
-            if (!e.target.closest('.user-avatar') && !e.target.closest('.user-dropdown')) {
-                userDropdown.classList.remove('show');
+            apkUpload.addEventListener('click', () => apkInput.click());
+            apkInput.addEventListener('change', handleApkUpload);
+
+            // Form submission
+            appSubmissionForm.addEventListener('submit', handleFormSubmission);
+
+            // Modal close button
+            modalCloseBtn.addEventListener('click', () => {
+                successModal.classList.remove('show');
+                window.location.href = '/dashboard';
+            });
+        }
+
+        // Handle thumbnail upload
+        function handleThumbnailUpload(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    alert('Please upload an image file (PNG, JPG, JPEG)');
+                    return;
+                }
+                
+                // Validate file size (5MB max)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('Thumbnail image must be less than 5MB');
+                    return;
+                }
+                
+                thumbnailFileName.textContent = file.name;
+                thumbnailFileName.style.display = 'block';
             }
-        });
+        }
+
+        // Handle APK upload
+        function handleApkUpload(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Validate file type
+                if (!file.name.endsWith('.apk')) {
+                    alert('Please upload an APK file');
+                    return;
+                }
+                
+                // Validate file size (500MB max)
+                if (file.size > 500 * 1024 * 1024) {
+                    alert('APK file must be less than 500MB');
+                    return;
+                }
+                
+                apkFileName.textContent = file.name;
+                apkFileName.style.display = 'block';
+            }
+        }
+
+        // Check authentication state
+        function checkAuthState() {
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    currentUser = user;
+                    await loadUserData(user);
+                    
+                    // Update UI for logged in user
+                    authButton.style.display = 'none';
+                    userAvatar.src = user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName || user.email}&background=6A1B9A&color=FFFFFF&bold=true`;
+                    userAvatar.style.display = 'block';
+                } else {
+                    // Redirect to login if not authenticated
+                    window.location.href = '/user/signin?redirect=' + encodeURIComponent(window.location.href);
+                }
+            });
+        }
+
+        // Load user data from Firestore
+        async function loadUserData(user) {
+            try {
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                if (userDoc.exists) {
+                    currentUserData = userDoc.data();
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+
+        // Handle form submission
+        async function handleFormSubmission(e) {
+            e.preventDefault();
+            
+            if (!currentUser) {
+                alert('Please sign in to submit an app.');
+                return;
+            }
+
+            // Validate form
+            const thumbnailFile = thumbnailInput.files[0];
+            const apkFile = apkInput.files[0];
+            
+            if (!thumbnailFile) {
+                alert('Please upload a thumbnail image.');
+                return;
+            }
+
+            if (!apkFile) {
+                alert('Please upload an APK file.');
+                return;
+            }
+
+            // Disable submit button
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<div class="loading"></div> Submitting...';
+
+            try {
+                const userId = currentUser.uid;
+                const userEmail = currentUser.email;
+                const username = currentUserData?.username || currentUser.displayName || 'Unknown';
+                const timestamp = firebase.firestore.FieldValue.serverTimestamp();
+                
+                // Generate unique IDs for files
+                const fileId = Date.now();
+                
+                // 1. Upload thumbnail to Firebase Storage
+                const thumbnailRef = storage.ref(`submissions/${userId}/${fileId}_${thumbnailFile.name}`);
+                const thumbnailSnapshot = await thumbnailRef.put(thumbnailFile);
+                const thumbnailUrl = await thumbnailSnapshot.ref.getDownloadURL();
+                
+                // 2. Upload APK to Firebase Storage
+                const apkRef = storage.ref(`submissions/${userId}/${fileId}_${apkFile.name}`);
+                const apkSnapshot = await apkRef.put(apkFile);
+                const apkUrl = await apkSnapshot.ref.getDownloadURL();
+                
+                // 3. Create submission document for pendingapproval collection
+                const submissionData = {
+                    title: document.getElementById('appTitle').value,
+                    description: document.getElementById('appDescription').value,
+                    category: document.getElementById('appCategory').value,
+                    publisher: username, // Add publisher field with username
+                    publisherId: userId,
+                    contactEmail: userEmail,
+                    thumbnailUrl: thumbnailUrl,
+                    apkUrl: apkUrl,
+                    userId: userId,
+                    userEmail: userEmail,
+                    status: 'pending',
+                    createdAt: timestamp,
+                    updatedAt: timestamp,
+                    // Additional metadata
+                    fileSize: apkFile.size,
+                    thumbnailSize: thumbnailFile.size,
+                    version: '1.0.0', // You might want to extract this from APK
+                    downloads: 0,
+                    rating: 0,
+                    reviewCount: 0
+                };
+                
+                // 4. Save to pendingapproval collection in Firestore
+                await db.collection('pendingapproval').add(submissionData);
+                
+                // 5. Show success modal
+                modalEmail.textContent = userEmail;
+                successModal.classList.add('show');
+                
+                // 6. Reset form
+                appSubmissionForm.reset();
+                thumbnailFileName.style.display = 'none';
+                apkFileName.style.display = 'none';
+                charCount.textContent = '0';
+                
+            } catch (error) {
+                console.error('Submission error:', error);
+                alert('Submission failed: ' + error.message);
+            } finally {
+                // Re-enable submit button
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send for Approval';
+            }
+        }
+
+        // Initialize the application when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
