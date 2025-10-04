@@ -77,7 +77,27 @@ function loadAppDetails() {
         
         // The document.title is safe to update here, but the OG tags MUST be done server-side.
         document.title = "Probe-App: " + currentApp.title;
-        
+        const bg = document.querySelector('.app-background');
+  if (!bg) return;
+
+  // Only set if non-empty; helps avoid showing a blown up fallback image
+  if (thumbnailUrl) {
+    bg.style.backgroundImage = `url("${currentApp.thumbnail}")`;
+    bg.classList.add('loaded', 'animate');
+    bg.style.opacity = '1';
+  } else {
+    // fallback: subtle gradient if no thumbnail
+    bg.style.backgroundImage = 'linear-gradient(135deg, rgba(106,27,154,0.18), rgba(216,27,96,0.12))';
+    bg.style.filter = 'blur(10px) brightness(0.9)';
+  }
+
+  // Example: open the confirm modal properly (if you use JS to show it)
+  const confirmOverlay = document.getElementById('confirmModalOverlay');
+  if (confirmOverlay) {
+    // ensure overlay has the modal-overlay class and starts hidden
+    confirmOverlay.classList.add('modal-overlay');
+    // To show: confirmOverlay.classList.add('show');  To hide: confirmOverlay.classList.remove('show');
+  }
         // Set price and download button
         if (currentApp.isPaid) {
             appPrice.textContent = `$${currentApp.price}`;
