@@ -12,30 +12,146 @@
     --hover-shadow: 0 15px 35px rgba(106, 27, 154, 0.25);
     --smooth-transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
-/* === APP BACKGROUND IMAGE (FADED THUMBNAIL) === */
+/* === BACKGROUND: blurred thumbnail, dimmed, non-interactive === */
 .app-background {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    filter: blur(20px) brightness(0.4);
-    opacity: 0.6;
-    z-index: -1;
-    transition: background-image 0.5s ease-in-out, opacity 0.3s ease;
+  position: fixed;
+  inset: 0;                        /* top:0; right:0; bottom:0; left:0 */
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  filter: blur(24px) saturate(0.85);
+  transform: scale(1.04);
+  z-index: 0;                       /* base layer */
+  pointer-events: none;             /* don't block clicks */
+  transition: background-image 0.45s ease-in-out, transform 8s linear, opacity 0.4s ease;
+  will-change: transform, opacity;
 }
 
-/* Optional: subtle fade-in animation */
-@keyframes fadeInBackground {
-    from { opacity: 0; transform: scale(1.05); }
-    to { opacity: 0.6; transform: scale(1); }
+/* subtle dim / gradient overlay on top of background for legibility */
+.app-background::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.18), rgba(0,0,0,0.55));
+  mix-blend-mode: normal;
+  pointer-events: none;
 }
 
-.app-background.loaded {
-    animation: fadeInBackground 1.2s ease forwards;
+/* ensure main content sits above the background */
+nav,
+main,
+.app-details-container,
+.user-dropdown,
+.notification-popup,
+.search-results,
+.app-carousel,
+.rating-section,
+footer {
+  position: relative;
+  z-index: 10;
+}
+
+/* nav already had z-index:100, keep that */
+nav { z-index: 110; }
+
+/* App header / cards: ensure text sits above background and gradients remain visible */
+.app-header,
+.app-card,
+.app-card-content,
+.app-card-title,
+.app-card-rating,
+.app-card-price {
+  position: relative;
+  z-index: 12;
+}
+
+/* make the small thumbnail in header stay as a normal image (not huge) */
+.app-thumbnail img {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  z-index: 13;
+  position: relative;
+}
+
+/* make background less intrusive on small screens */
+@media (max-width: 768px) {
+  .app-background { filter: blur(28px) brightness(0.9); transform: scale(1.02); }
+}
+
+/* === Modal styles (so confirm dialog is centered and looks correct) === */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;                    /* toggled via .show class */
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.45);
+  z-index: 200;                      /* top-most */
+  padding: 24px;
+}
+
+.modal-overlay.show { display: flex; }
+
+.modal-content {
+  width: 100%;
+  max-width: 680px;
+  background: var(--white);
+  border-radius: 12px;
+  padding: 22px;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+  transform: translateY(0);
+  transition: var(--smooth-transition);
+  font-family: 'Montserrat', sans-serif;
+}
+
+/* icon + title */
+.modal-content .success-icon {
+  font-size: 28px;
+  display: inline-block;
+}
+
+.modal-title {
+  color: var(--primary-color);
+  margin: 0 0 8px 0;
+  font-weight: 700;
+  font-size: 1.4rem;
+}
+
+/* buttons row */
+.modal-buttons {
+  display:flex;
+  gap: 12px;
+  margin-top: 18px;
+  justify-content: flex-end;
+}
+
+.modal-buttons .btn-success,
+.modal-buttons .btn-danger {
+  border: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+/* quick colors for modal buttons */
+.btn-success { background: linear-gradient(90deg, var(--primary-color), var(--secondary-color)); color: #fff; }
+.btn-danger  { background: #f4f4f4; color: var(--dark-text); border: 1px solid #eee; }
+
+/* Accessibility: don't let background steal focus */
+.app-background[aria-hidden="true"] { outline: none; }
+
+/* optional: subtle slow zoom animation for background */
+.app-background.animate {
+  animation: slow-zoom 20s linear infinite;
+}
+@keyframes slow-zoom {
+  0%   { transform: scale(1.02); }
+  50%  { transform: scale(1.06); }
+  100% { transform: scale(1.02); }
 }
 
 * {
