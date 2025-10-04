@@ -82,7 +82,7 @@ function loadAppDetails() {
 
   // Only set if non-empty; helps avoid showing a blown up fallback image
   if (thumbnailUrl) {
-    bg.style.backgroundImage = `url("${currentApp.thumbnail}")`;
+    bg.style.backgroundImage = currentApp.thumbnailUrl;
     bg.classList.add('loaded', 'animate');
     bg.style.opacity = '1';
   } else {
