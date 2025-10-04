@@ -81,8 +81,8 @@ function loadAppDetails() {
   if (!bg) return;
 
   // Only set if non-empty; helps avoid showing a blown up fallback image
-  if (thumbnailUrl) {
-    bg.style.backgroundImage = currentApp.thumbnailUrl;
+  if (currentApp.thumbnail) {
+    bg.style.backgroundImage = appThumbnail.src;
     bg.classList.add('loaded', 'animate');
     bg.style.opacity = '1';
   } else {
